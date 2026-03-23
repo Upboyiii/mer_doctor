@@ -35,6 +35,7 @@ import util from '../../utils/util';
 import {
 	globalConfigApi, loginConfigApi
 } from "../../api/public";
+import { normalizeLogoFromConfig } from "../../utils/siteLogo";
 import store from "../index";
 import Routine from "../../libs/routine";
 const state = {
@@ -238,10 +239,11 @@ const mutations = {
 		Cache.set('publicLoginType', data.wechatBrowserVisit);
 		//小程序手机号校验类型（多选）1微信小程序验证 2短信验证
 		state.globalData.routinePhoneVerification = data.routinePhoneVerification;
-		//登录页logo
-		state.globalData.mobileLoginLogo = data.mobileLoginLogo;
+		// 登录页 / 我的 / 关于我们 共用（接口字段 logo 或 mobileLoginLogo）
+		const logoUrl = normalizeLogoFromConfig(data);
+		state.globalData.mobileLoginLogo = logoUrl;
 		Cache.set(GLOBAL_DATA, state.globalData);
-		uni.setStorageSync('mobileLoginLogo', data.mobileLoginLogo);
+		uni.setStorageSync('mobileLoginLogo', logoUrl);
 	},
 	//修改globalData中的值，分销码，id等
 	Change_GLOBAL_DATA_Spread(state, data) {

@@ -2,11 +2,30 @@
 	<view class="mine-page">
 		<!-- 资质认证弹窗 -->
 		<cert-popup :show.sync="showCertPopup"></cert-popup>
+
+		<!-- 联系客服：底部双块操作表（致电 / 取消） -->
+		<view class="customer-mask" v-if="showCustomerSheet" @tap.self="closeCustomerSheet">
+			<view class="customer-action-wrap" @tap.stop>
+				<view class="customer-action-card" @tap="dialCustomer">
+					<view class="customer-call-row">
+						<text class="iconfont icon-ic_phone customer-call-icon"></text>
+						<text class="customer-call-text">致电 400 021 2018</text>
+					</view>
+				</view>
+				<view class="customer-action-card customer-cancel-card" @tap="closeCustomerSheet">
+					<text class="customer-cancel-text">取消</text>
+				</view>
+			</view>
+		</view>
 		<!-- 顶部渐变区 -->
 		<view class="user-header">
 			<view class="msg-btn" @tap="toMessage">
 				<image class="msg-icon" src="/static/images/icon-message.png" mode="aspectFit"></image>
 			</view>
+
+			<!-- <view class="mine-logo-shading">
+				<image class="mine-logo-img" :src="siteLogoUrl" mode="aspectFit" />
+			</view> -->
 
 			<view class="user-row">
 				<image class="user-avatar" :src="doctorInfo.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
@@ -95,6 +114,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import CertPopup from '@/components/certPopup/index.vue';
 
 export default {
@@ -104,6 +124,7 @@ export default {
 		return {
 			isOnline: true,
 			showCertPopup: false,
+			showCustomerSheet: false,
 			doctorInfo: {
 				certified: false  // TODO: 从后端获取
 			},
@@ -112,7 +133,7 @@ export default {
 			pendingAmount: '0.00',
 			settlingAmount: '0.00',
 			serviceItems: [
-				{ icon: '/static/images/icon-service-setting.png', label: '服务设置', url: '/pages/user/index' },
+				{ icon: '/static/images/icon-service-setting.png', label: '服务设置', url: '/pages/user/index', skipCertCheck: true },
 				{ icon: '/static/images/icon-evaluation.png', label: '患者评价', url: '/pages/mine/evaluation' },
 				{ icon: '/static/images/icon-profile.png', label: '个人介绍', url: '/pages/users/user_info/index' },
 				{ icon: '/static/images/icon-qualification.png', label: '资质认证', url: '/pages/auth/qualification', skipCertCheck: true }
@@ -120,14 +141,15 @@ export default {
 		}
 	},
 	computed: {
+		...mapGetters(['siteLogoUrl']),
 		menuItems() {
 			return [
 				{ icon: '/static/images/icon-online-status.png', label: '在线 / 离线设置', tap: () => this.toggleStatus() },
 				{ icon: '/static/images/icon-assistant.png', label: '医师助手', url: '/pages/mine/assistant' },
 				{ icon: '/static/images/icon-customer-service.png', label: '联系客服', tap: () => this.toCustomer() },
-				{ icon: '/static/images/icon-feedback.png', label: '意见反馈', url: '/pages/mine/feedback' },
-				{ icon: '/static/images/icon-about.png', label: '关于我们', tap: () => this.toAbout() },
-				{ icon: '/static/images/icon-setting.png', label: '设置', url: '/pages/user/index' }
+				{ icon: '/static/images/icon-feedback.png', label: '意见反馈', url: '/pages/mine/feedback', skipCertCheck: true },
+				{ icon: '/static/images/icon-about.png', label: '关于我们', url: '/pages/mine/about', skipCertCheck: true },
+				{ icon: '/static/images/icon-setting.png', label: '设置', url: '/pages/user/index', skipCertCheck: true }
 			]
 		}
 	},
@@ -162,8 +184,21 @@ export default {
 			}
 			uni.navigateTo({ url: '/pages/mine/fund' });
 		},
-		toCustomer() { uni.showToast({ title: '客服功能即将上线', icon: 'none' }) },
-		toAbout() { uni.showToast({ title: '关于我们页面开发中', icon: 'none' }) },
+		toCustomer() {
+			this.showCustomerSheet = true;
+		},
+		closeCustomerSheet() {
+			this.showCustomerSheet = false;
+		},
+		dialCustomer() {
+			uni.makePhoneCall({
+				phoneNumber: '4000212018',
+				fail: () => {
+					uni.showToast({ title: '无法拨打电话', icon: 'none' });
+				}
+			});
+			this.closeCustomerSheet();
+		},
 		toConsultant() { uni.showToast({ title: '专属顾问功能即将上线', icon: 'none' }) }
 	}
 }
@@ -195,7 +230,22 @@ $bg: #F5F5F5;
 		.msg-icon { width: 44rpx; height: 44rpx; }
 	}
 
-	.user-row { display: flex; align-items: center; margin-top: 16rpx; }
+	.mine-logo-shading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		margin-top: 4rpx;
+		margin-bottom: 8rpx;
+	}
+
+	.mine-logo-img {
+		height: 120rpx;
+		width: 420rpx;
+		max-width: 100%;
+	}
+
+	.user-row { display: flex; align-items: center; margin-top: 8rpx; }
 
 	.user-avatar {
 		width: 88rpx; height: 88rpx;
@@ -306,5 +356,65 @@ $bg: #F5F5F5;
 		font-size: 18rpx; color: #fff; background: $primary;
 		padding: 4rpx 12rpx; border-radius: 0 0 12rpx 12rpx; margin-top: -4rpx;
 	}
+}
+
+$action-blue: #007aff;
+
+.customer-mask {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 10000;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+}
+
+.customer-action-wrap {
+	padding: 0 16rpx calc(16rpx + env(safe-area-inset-bottom));
+	animation: customer-sheet-in 0.28s ease-out;
+}
+
+@keyframes customer-sheet-in {
+	from { transform: translateY(100%); opacity: 0.96; }
+	to { transform: translateY(0); opacity: 1; }
+}
+
+.customer-action-card {
+	background: #fff;
+	border-radius: 24rpx;
+	overflow: hidden;
+}
+.customer-cancel-card {
+	margin-top: 16rpx;
+}
+
+.customer-call-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 36rpx 24rpx;
+}
+
+.customer-call-icon {
+	font-size: 40rpx;
+	color: $action-blue;
+	margin-right: 16rpx;
+}
+
+.customer-call-text {
+	font-size: 34rpx;
+	font-weight: 500;
+	color: $action-blue;
+	letter-spacing: 2rpx;
+}
+
+.customer-cancel-text {
+	display: block;
+	text-align: center;
+	font-size: 34rpx;
+	font-weight: 500;
+	color: $action-blue;
+	padding: 32rpx 0;
 }
 </style>

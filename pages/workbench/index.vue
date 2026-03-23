@@ -4,7 +4,7 @@
 		<view class="top-gradient">
 			<view class="top-bar">
 				<view class="logo-area">
-					<image class="logo-img" src="/static/images/logo.png" mode="aspectFit"></image>
+					<image class="logo-img" :src="siteLogoUrl" mode="heightFix"></image>
 				</view>
 				<view class="msg-btn" @tap="toMessage">
 					<image class="msg-icon" src="/static/images/icon-message.png" mode="aspectFit"></image>
@@ -88,8 +88,21 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
 	name: 'WorkbenchIndex',
+	computed: {
+		...mapGetters(['siteLogoUrl']),
+		statList() {
+			return [
+				{ value: this.stats.pending, label: '待接诊', tap: () => this.toConsultation() },
+				{ value: this.stats.reply, label: '待回复', tap: () => this.toConsultation() },
+				{ value: this.stats.video, label: '待视频', tap: () => this.toConsultation() },
+				{ value: this.stats.prescription, label: '待修改处方', tap: () => this.toPage('/pages/prescription/edit') }
+			]
+		}
+	},
 	data() {
 		return {
 			isOnline: true,
@@ -106,16 +119,6 @@ export default {
 				{ icon: '/static/images/icon-announce-setting.png', label: '公告设置', url: '/pages/workbench/announcement' },
 				{ icon: '/static/images/icon-card.png', label: '名片', url: '/pages/mine/card' },
 				{ icon: '/static/images/icon-assistant.png', label: '医师助手', url: '/pages/mine/assistant' }
-			]
-		}
-	},
-	computed: {
-		statList() {
-			return [
-				{ value: this.stats.pending, label: '待接诊', tap: () => this.toConsultation() },
-				{ value: this.stats.reply, label: '待回复', tap: () => this.toConsultation() },
-				{ value: this.stats.video, label: '待视频', tap: () => this.toConsultation() },
-				{ value: this.stats.prescription, label: '待修改处方', tap: () => this.toPage('/pages/prescription/edit') }
 			]
 		}
 	},
@@ -160,9 +163,24 @@ $bg: #F5F5F5;
 	align-items: center;
 	padding: 70rpx 30rpx 10rpx;
 
-	.logo-img { height: 56rpx; width: 200rpx; }
+	.logo-area {
+		flex: 1;
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		min-width: 0;
+	}
+
+	.logo-img {
+		height: 56rpx;
+		width: auto;
+		max-width: 320rpx;
+		display: block;
+	}
 
 	.msg-btn {
+		flex-shrink: 0;
+		margin-left: 16rpx;
 		width: 56rpx; height: 56rpx;
 		display: flex; align-items: center; justify-content: center;
 		.msg-icon { width: 44rpx; height: 44rpx; }

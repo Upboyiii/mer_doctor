@@ -172,6 +172,13 @@
 			}
 		},
 		{
+			"path": "pages/mine/about",
+			"style": {
+				"navigationBarTitleText": "关于我们",
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/mine/fund",
 			"style": {
 				"navigationBarTitleText": "资金管理",

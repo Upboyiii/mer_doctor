@@ -8,6 +8,8 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
+import { normalizeLogoFromConfig } from '@/utils/siteLogo';
+
 export default {
 	token: state => state.app.token,  // 用户登录
 	managerToken: state => state.app.managerToken, // 移动端商家管理登录
@@ -34,5 +36,7 @@ export default {
 	selectMerId:state => state.app.selectMerId,
 	selectMerchantRole:state => state.app.selectMerchantRole,
 	isAdvertisement: state => state.app.isAdvertisement,
-	merMemberInfo: state => state.app.merMemberInfo
+	merMemberInfo: state => state.app.merMemberInfo,
+	/** 与登录页顶部 Logo 同源（login/config：logo / mobileLoginLogo） */
+	siteLogoUrl: state => normalizeLogoFromConfig(state.app.globalData || {})
 };

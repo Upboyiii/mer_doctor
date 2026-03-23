@@ -1,7 +1,7 @@
 <template>
 	<view class="login-wrapper" :data-theme="theme">
 		<view class="shading">
-			<image :src="logoUrl" mode="aspectFit"/>
+			<image :src="displayLogo" mode="aspectFit"/>
 			<!-- <image src="/static/images/logo2.png" v-if="!logoUrl" /> -->
 		</view>
 		<view class="whiteBg" v-if="formItem === 1">
@@ -117,6 +117,7 @@
 		appAuth,
 		appleLogin
 	} from "@/api/public";
+	import { normalizeLogoFromConfig } from "@/utils/siteLogo";
 	import {
 		VUE_APP_API_URL
 	} from "@/utils";
@@ -146,7 +147,12 @@
 		components: {
 			Verify,
 		},
-		computed: mapGetters(['userInfo', 'isLogin', 'globalData']),
+		computed: {
+			...mapGetters(['userInfo', 'isLogin', 'globalData', 'siteLogoUrl']),
+			displayLogo() {
+				return this.logoUrl || this.siteLogoUrl;
+			}
+		},
 		data: function() {
 			return {
 				isAgree: false,
@@ -341,7 +347,7 @@
 			async getLogoImage() {
 				let that = this;
 				loginConfigApi().then(res => {
-					that.logoUrl = res.data.logo ? res.data.logo : '/static/images/logo2.png';
+					that.logoUrl = normalizeLogoFromConfig(res.data);
 				});
 			},
 			/**
