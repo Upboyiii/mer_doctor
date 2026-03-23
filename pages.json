@@ -1,0 +1,397 @@
+{
+	"lazyCodeLoading": "requiredComponents",
+	"pages": [
+		{
+			"path": "pages/workbench/index",
+			"style": {
+				"navigationBarTitleText": "工作台",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true,
+				"backgroundTextStyle": "dark"
+			}
+		},
+		{
+			"path": "pages/consultation/index",
+			"style": {
+				"navigationBarTitleText": "问诊",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true,
+				"backgroundTextStyle": "dark"
+			}
+		},
+		{
+			"path": "pages/mine/index",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true,
+				"backgroundTextStyle": "dark"
+			}
+		},
+		{
+			"path": "pages/workbench/board",
+			"style": {
+				"navigationBarTitleText": "数据看板",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/workbench/announcement",
+			"style": {
+				"navigationBarTitleText": "公告",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/consultation/detail",
+			"style": {
+				"navigationBarTitleText": "接诊详情",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/consultation/chat",
+			"style": {
+				"navigationBarTitleText": "问诊",
+				"navigationStyle": "custom",
+				"disableScroll": true,
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/consultation/video",
+			"style": {
+				"navigationBarTitleText": "视频问诊",
+				"navigationStyle": "custom",
+				"disableScroll": true,
+				"app-plus": {
+					"orientation": "portrait-primary"
+				}
+			}
+		},
+		{
+			"path": "pages/consultation/apply",
+			"style": {
+				"navigationBarTitleText": "就诊申请",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/consultation/reception",
+			"style": {
+				"navigationBarTitleText": "接诊",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/consultation/reply",
+			"style": {
+				"navigationBarTitleText": "回复",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/patient/index",
+			"style": {
+				"navigationBarTitleText": "患者管理",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/patient/create",
+			"style": {
+				"navigationBarTitleText": "创建患者",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/patient/invite",
+			"style": {
+				"navigationBarTitleText": "邀请患者",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/prescription/create",
+			"style": {
+				"navigationBarTitleText": "在线开方",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/prescription/edit",
+			"style": {
+				"navigationBarTitleText": "修改处方",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/prescription/history",
+			"style": {
+				"navigationBarTitleText": "历史处方",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/mine/inquiry-form",
+			"style": {
+				"navigationBarTitleText": "问诊单",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mine/card",
+			"style": {
+				"navigationBarTitleText": "我的名片",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mine/assistant",
+			"style": {
+				"navigationBarTitleText": "医师助手",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mine/evaluation",
+			"style": {
+				"navigationBarTitleText": "评价管理",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/mine/feedback",
+			"style": {
+				"navigationBarTitleText": "意见反馈",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/mine/fund",
+			"style": {
+				"navigationBarTitleText": "资金管理",
+				"navigationStyle": "custom",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/auth/notice",
+			"style": {
+				"navigationBarTitleText": "资质须知",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/auth/qualification",
+			"style": {
+				"navigationBarTitleText": "资质认证",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/user/index",
+			"style": {
+				"navigationBarTitleText": "设置",
+				"navigationStyle": "custom"
+			}
+		}
+	],
+	"subPackages": [
+		{
+			"root": "pages/users",
+			"name": "users",
+			"pages": [
+				{
+					"path": "login/index",
+					"style": {
+						"navigationBarTitleText": "登录",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "web_page/index",
+					"style": {
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "user_info/index",
+					"style": {
+						"navigationBarTitleText": "个人资料",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "user_setting/index",
+					"style": {
+						"navigationBarTitleText": "个人信息",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "user_pwd_edit/index",
+					"style": {
+						"navigationBarTitleText": "修改密码",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "user_phone/index",
+					"style": {
+						"navigationBarTitleText": "修改手机号",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "app_login/index",
+					"style": {
+						"navigationBarTitleText": "绑定手机号",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "app_update/app_update",
+					"style": {
+						"navigationBarTitleText": "检查更新",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "wechat_login/index",
+					"style": {
+						"navigationBarTitleText": "账户登录",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/agreement",
+			"name": "agreement",
+			"pages": [
+				{
+					"path": "rules/index",
+					"style": {
+						"navigationBarTitleText": "隐私协议",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "info/index",
+					"style": {
+						"navigationBarTitleText": "",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				}
+			]
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "医生端",
+		"pageOrientation": "portrait",
+		"navigationBarBackgroundColor": "#fff",
+		"backgroundColor": "#F8F8F8",
+		"titleNView": false,
+		"rpxCalcMaxDeviceWidth": 960,
+		"rpxCalcBaseDeviceWidth": 375,
+		"rpxCalcIncludeWidth": 750,
+		"app-plus": {
+			"scrollIndicator": "none"
+		}
+	},
+	"tabBar": {
+		"custom": false,
+		"color": "#999999",
+		"selectedColor": "#56C2B8",
+		"borderStyle": "white",
+		"backgroundColor": "#ffffff",
+		"height": "60px",
+		"fontSize": "10px",
+		"iconWidth": "24px",
+		"spacing": "3px",
+		"list": [
+			{
+				"pagePath": "pages/workbench/index",
+				"iconPath": "static/tabBar/shouwei.png",
+				"selectedIconPath": "static/tabBar/shouxuan.png",
+				"text": "工作台"
+			},
+			{
+				"pagePath": "pages/consultation/index",
+				"iconPath": "static/tabBar/merchantwei.png",
+				"selectedIconPath": "static/tabBar/merchantxuan.png",
+				"text": "问诊"
+			},
+			{
+				"pagePath": "pages/mine/index",
+				"iconPath": "static/tabBar/wowei.png",
+				"selectedIconPath": "static/tabBar/woxuan.png",
+				"text": "我的"
+			}
+		]
+	},
+	"condition": {
+		"current": 0,
+		"list": [
+			{
+				"name": "",
+				"path": "",
+				"query": ""
+			}
+		]
+	}
+}

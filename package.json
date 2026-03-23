@@ -1,0 +1,9 @@
+{
+  "name": "mer_doctor",
+  "version": "1.0.0",
+  "description": "医生端",
+  "dependencies": {
+    "@qiun/ucharts": "^2.5.0-20230101",
+    "weixin-js-sdk": "^1.6.5"
+  }
+}
