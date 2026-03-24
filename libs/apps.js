@@ -9,7 +9,7 @@
 // +----------------------------------------------------------------------
 
 import { appAuth } from '../api/public';
-import { tokenIsExistApi } from '@/api/api.js';
+import { tokenIsExistApi } from '@/api/doctor.js';
 
 class Apps{
 	/**

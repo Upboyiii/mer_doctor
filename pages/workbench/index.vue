@@ -12,13 +12,13 @@
 			</view>
 
 			<view class="user-section">
-				<image class="user-avatar" :src="doctorInfo.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+				<image class="user-avatar" :src="doctorInfo.picture || '/static/images/default-avatar.png'" mode="aspectFill"></image>
 				<view class="user-meta">
 					<view class="name-row">
 						<text class="user-phone">{{doctorInfo.phone || '医生'}}</text>
-						<view class="cert-tag" :class="doctorInfo.certified ? 'ok' : 'warn'">
+						<view class="cert-tag" :class="doctorInfo.auditStatus === 1 ? 'ok' : 'warn'">
 							<view class="dot"></view>
-							<text>{{doctorInfo.certified ? '已认证' : '未认证'}}</text>
+							<text>{{doctorInfo.auditStatus === 1 ? '已认证' : (doctorInfo.auditStatus === 2 ? '审核中' : '未认证')}}</text>
 						</view>
 						<view class="cert-tag warn">
 							<view class="dot"></view>
@@ -89,6 +89,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { getDoctorInfo } from '@/api/doctor';
+import { normalizeDoctorInfo } from '@/utils/siteLogo';
 
 export default {
 	name: 'WorkbenchIndex',
@@ -106,7 +108,12 @@ export default {
 	data() {
 		return {
 			isOnline: true,
-			doctorInfo: {},
+			doctorInfo: {
+				phone: '',
+				picture: '',
+				auditStatus: 0,
+				onlineStatus: 2
+			},
 			patientCount: 0,
 			announcement: '关于劳务个税代扣代缴相关事宜调整的通知',
 			stats: { pending: 0, reply: 0, video: 0, prescription: 0 },
@@ -125,7 +132,20 @@ export default {
 	onLoad() { this.loadData() },
 	onPullDownRefresh() { this.loadData(() => uni.stopPullDownRefresh()) },
 	methods: {
-		loadData(cb) { cb && cb() },
+		loadData(cb) {
+			getDoctorInfo().then(res => {
+				const d = normalizeDoctorInfo(res.data || {});
+				this.doctorInfo = {
+					phone: d.phone || '',
+					picture: d.picture || '',
+					auditStatus: d.auditStatus || 0,
+					onlineStatus: d.onlineStatus || 2
+				};
+				this.isOnline = d.onlineStatus === 1;
+			}).catch(() => {}).finally(() => {
+				cb && cb();
+			});
+		},
 		toggleStatus() {
 			this.isOnline = !this.isOnline
 			uni.showToast({ title: this.isOnline ? '已切换为接单中' : '已切换为休息中', icon: 'none' })

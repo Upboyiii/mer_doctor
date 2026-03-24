@@ -33,9 +33,10 @@
 						<text class="form-label required">头像</text>
 					</view>
 					<view class="avatar-upload" @tap="uploadAvatar">
-						<image v-if="form.avatar" :src="form.avatar" class="avatar-preview" mode="aspectFill"></image>
+						<image v-if="form.picture" :src="form.picture" class="avatar-preview" mode="aspectFill"></image>
 						<view v-else class="avatar-placeholder">
-							<text class="plus">+</text>
+							<view v-if="uploadingField === 'picture'" class="avatar-loading"><text class="loading-dot">...</text></view>
+							<text v-else class="plus">+</text>
 						</view>
 					</view>
 
@@ -45,167 +46,228 @@
 						<input class="form-input" v-model="form.name" placeholder="请输入真实姓名" placeholder-class="ph" />
 					</view>
 
-					<!-- 医生所属 -->
-					<view class="form-row arrow" @tap="pickField('clinic')">
-						<text class="form-label required">医生所属</text>
-						<view class="form-input-row">
-							<text class="form-value" :class="{ ph: !form.clinic }">{{form.clinic || '榕树家诊所'}}</text>
-							<text class="arrow-icon">›</text>
-						</view>
-					</view>
-
-					<!-- 机构名称 -->
-					<view class="form-row arrow" @tap="pickField('institution')">
+					<!-- 机构名称 (hospitalName) -->
+					<view class="form-row">
 						<text class="form-label required">机构名称</text>
-						<view class="form-input-row">
-							<text class="form-value" :class="{ ph: !form.institution }">{{form.institution || ''}}</text>
-							<text class="arrow-icon">›</text>
-						</view>
+						<input class="form-input" v-model="form.hospitalName" placeholder="请输入所在医院/机构名称" placeholder-class="ph" />
 					</view>
 
-					<!-- 职业 -->
-					<view class="form-row arrow" @tap="pickField('profession')">
+					<!-- 职业 (hospitalCareer) -->
+					<view class="form-row arrow" @tap="pickField('hospitalCareer')">
 						<text class="form-label required">职业</text>
 						<view class="form-input-row">
-							<text class="form-value" :class="{ ph: !form.profession }">{{form.profession || '请选择职业'}}</text>
+							<text class="form-value" :class="{ ph: !form.hospitalCareer }">{{form.hospitalCareer || '请选择职业'}}</text>
 							<text class="arrow-icon">›</text>
 						</view>
 					</view>
 
-					<!-- 职称 -->
-					<view class="form-row arrow" @tap="pickField('title')">
+					<!-- 职称 (hospitalTitle) -->
+					<view class="form-row arrow" @tap="pickField('hospitalTitle')">
 						<text class="form-label required">职称</text>
 						<view class="form-input-row">
-							<text class="form-value" :class="{ ph: !form.title }">{{form.title || '请选择职称'}}</text>
+							<text class="form-value" :class="{ ph: !form.hospitalTitle }">{{form.hospitalTitle || '请选择职称'}}</text>
 							<text class="arrow-icon">›</text>
 						</view>
 					</view>
 
-					<!-- 科室 -->
-					<view class="form-row arrow" @tap="pickField('department')">
+					<!-- 科室 (hospitalSub) -->
+					<view class="form-row arrow" @tap="pickField('hospitalSub')">
 						<text class="form-label required">科室</text>
 						<view class="form-input-row">
-							<text class="form-value" :class="{ ph: !form.department }">{{form.department || '请选择科室'}}</text>
+							<text class="form-value" :class="{ ph: !form.hospitalSub }">{{form.hospitalSub || '请选择科室'}}</text>
 							<text class="arrow-icon">›</text>
 						</view>
 					</view>
 				</view>
 
-				<!-- 个人简介 -->
+				<!-- 个人简介 (selfInfo) -->
 				<view class="section-card">
 					<text class="section-label required">个人简介</text>
 					<textarea
 						class="bio-textarea"
-						v-model="form.bio"
-						placeholder="请填写个人简介，介绍您的从医经历、擅长方向等（50字以上）"
+						v-model="form.selfInfo"
+						placeholder="请填写个人简介，介绍您的从医经历、擅长方向等（20字以上）"
 						placeholder-class="ph"
 						:maxlength="500"
 						auto-height
 					></textarea>
-					<text class="word-count">{{form.bio.length}}/500</text>
+					<text class="word-count">{{form.selfInfo.length}}/500</text>
 				</view>
 
-				<!-- 我的擅长 -->
+				<!-- 我的擅长 (hospitalDomain) -->
 				<view class="section-card">
 					<text class="section-label required">我的擅长</text>
 					<textarea
 						class="bio-textarea"
-						v-model="form.specialties"
+						v-model="form.hospitalDomain"
 						placeholder="请填写您擅长诊治的疾病或症状，如：高血压、糖尿病管理、心脏病..."
 						placeholder-class="ph"
 						:maxlength="300"
 						auto-height
 					></textarea>
-					<text class="word-count">{{form.specialties.length}}/300</text>
+					<text class="word-count">{{form.hospitalDomain.length}}/300</text>
 				</view>
 
-			<!-- 证件上传 -->
-			<!-- 身份证 -->
-			<view class="section-card">
-				<text class="cert-section-title">*身份证</text>
-				<view class="id-number-row">
-					<text class="id-number-label">身份证号</text>
-					<input class="id-number-input" v-model="form.idNumber" placeholder="请输入身份证号码" placeholder-class="ph" />
-				</view>
-				<view class="id-cards-row">
-					<view class="id-card-box" @tap="uploadImage('idFront')">
-						<image v-if="form.idFront" :src="form.idFront" class="id-card-img" mode="aspectFill"></image>
-						<view v-else class="id-card-placeholder">
-							<view class="id-front-inner">
-								<view class="id-avatar-wrap">
-									<view class="id-avatar-head"></view>
-									<view class="id-avatar-body"></view>
-								</view>
-								<view class="id-lines-wrap">
-									<view class="id-line w100"></view>
-									<view class="id-line w70"></view>
-									<view class="id-line w50"></view>
-									<view class="id-line w70"></view>
-								</view>
+		<!-- 证件上传 -->
+		<!-- 身份证 -->
+		<view class="section-card">
+			<text class="cert-section-title">*身份证</text>
+			<view class="id-number-row">
+				<text class="id-number-label">身份证号</text>
+				<input class="id-number-input" v-model="form.idcardNum" placeholder="请输入身份证号码" placeholder-class="ph" />
+			</view>
+			<view class="id-cards-row">
+				<view class="id-card-box" @tap="pickImage('idcardObverseImageUrl')">
+					<image v-if="form.idcardObverseImageUrl" :src="form.idcardObverseImageUrl" class="id-card-img" mode="aspectFill"></image>
+					<view v-else class="id-card-placeholder">
+						<view v-if="uploadingField === 'idcardObverseImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="id-front-inner">
+							<view class="id-avatar-wrap">
+								<view class="id-avatar-head"></view>
+								<view class="id-avatar-body"></view>
 							</view>
-							<text class="id-card-tip">点击上传正面</text>
+							<view class="id-lines-wrap">
+								<view class="id-line w100"></view>
+								<view class="id-line w70"></view>
+								<view class="id-line w50"></view>
+								<view class="id-line w70"></view>
+							</view>
 						</view>
+						<text class="id-card-tip" v-if="uploadingField !== 'idcardObverseImageUrl'">点击上传正面</text>
 					</view>
-					<view class="id-card-box" @tap="uploadImage('idBack')">
-						<image v-if="form.idBack" :src="form.idBack" class="id-card-img" mode="aspectFill"></image>
-						<view v-else class="id-card-placeholder">
-							<view class="id-back-inner">
-								<view class="id-emblem-wrap">
-									<view class="id-emblem-circle"></view>
-								</view>
-								<view class="id-back-text">
-									<text class="id-back-country">中华人民共和国</text>
-									<text class="id-back-name">居民身份证</text>
-								</view>
+				</view>
+				<view class="id-card-box" @tap="pickImage('idcardReverseImageUrl')">
+					<image v-if="form.idcardReverseImageUrl" :src="form.idcardReverseImageUrl" class="id-card-img" mode="aspectFill"></image>
+					<view v-else class="id-card-placeholder">
+						<view v-if="uploadingField === 'idcardReverseImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="id-back-inner">
+							<view class="id-emblem-wrap">
+								<view class="id-emblem-circle"></view>
 							</view>
-							<text class="id-card-tip">点击上传背面</text>
+							<view class="id-back-text">
+								<text class="id-back-country">中华人民共和国</text>
+								<text class="id-back-name">居民身份证</text>
+							</view>
 						</view>
+						<text class="id-card-tip" v-if="uploadingField !== 'idcardReverseImageUrl'">点击上传背面</text>
 					</view>
 				</view>
 			</view>
+		</view>
 
-			<!-- 医师执业证 -->
-			<view class="section-card">
-				<text class="cert-section-title">*医师执业证</text>
-				<text class="cert-section-sub">需上传编码页和执业地点页</text>
-				<view class="cert-upload-row">
-					<view class="cert-upload-box" @tap="uploadImage('licenseCode')">
-						<image v-if="form.licenseCode" :src="form.licenseCode" class="cert-upload-img" mode="aspectFill"></image>
-						<view v-else class="cert-upload-empty">
-							<view class="cert-doc-icon">
-								<view class="cert-doc-head"></view>
-								<view class="cert-doc-line"></view>
-								<view class="cert-doc-line short"></view>
-							</view>
+		<!-- 医师执业证（编码页 + 执业地点页） -->
+		<view class="section-card">
+			<text class="cert-section-title">*医师执业证</text>
+			<text class="cert-section-sub">需上传编码页和执业地点页</text>
+			<view class="cert-upload-row">
+				<view class="cert-upload-box" @tap="pickImage('licenseImageUrl')">
+					<image v-if="form.licenseImageUrl" :src="form.licenseImageUrl" class="cert-upload-img" mode="aspectFill"></image>
+					<view v-else class="cert-upload-empty">
+						<view v-if="uploadingField === 'licenseImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="cert-doc-icon">
+							<view class="cert-doc-head"></view>
+							<view class="cert-doc-line"></view>
+							<view class="cert-doc-line short"></view>
 						</view>
 					</view>
 				</view>
-			</view>
-
-			<!-- 职称证 -->
-			<view class="section-card">
-				<text class="cert-section-title">*职称证</text>
-				<text class="cert-section-sub">若无职称证可上传工牌</text>
-				<view class="cert-upload-row">
-					<view class="cert-upload-box" @tap="uploadImage('titleCert')">
-						<image v-if="form.titleCert" :src="form.titleCert" class="cert-upload-img" mode="aspectFill"></image>
-						<view v-else class="cert-upload-empty">
-							<view class="cert-doc-icon">
-								<view class="cert-doc-head"></view>
-								<view class="cert-doc-line"></view>
-								<view class="cert-doc-line short"></view>
-							</view>
+				<view class="cert-upload-box" @tap="pickImage('licenseLocationImageUrl')">
+					<image v-if="form.licenseLocationImageUrl" :src="form.licenseLocationImageUrl" class="cert-upload-img" mode="aspectFill"></image>
+					<view v-else class="cert-upload-empty">
+						<view v-if="uploadingField === 'licenseLocationImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="cert-doc-icon">
+							<view class="cert-doc-head"></view>
+							<view class="cert-doc-line"></view>
+							<view class="cert-doc-line short"></view>
 						</view>
 					</view>
 				</view>
 			</view>
+			<view class="cert-upload-labels">
+				<text class="cert-upload-label">编码页</text>
+				<text class="cert-upload-label">执业地点页</text>
+			</view>
+		</view>
 
-			<view class="section-card">
-				<view class="form-tip">
-					<text class="iconfont icon-ic_tips"></text>
-					<text class="tip-text">信息仅用于认证审核，平台将保障您的信息安全</text>
+		<!-- 职称证 (hospitalTitleImageUrl) -->
+		<view class="section-card">
+			<text class="cert-section-title">*职称证</text>
+			<text class="cert-section-sub">若无职称证可上传工牌</text>
+			<view class="cert-upload-row">
+				<view class="cert-upload-box" @tap="pickImage('hospitalTitleImageUrl')">
+					<image v-if="form.hospitalTitleImageUrl" :src="form.hospitalTitleImageUrl" class="cert-upload-img" mode="aspectFill"></image>
+					<view v-else class="cert-upload-empty">
+						<view v-if="uploadingField === 'hospitalTitleImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="cert-doc-icon">
+							<view class="cert-doc-head"></view>
+							<view class="cert-doc-line"></view>
+							<view class="cert-doc-line short"></view>
+						</view>
+					</view>
 				</view>
 			</view>
+		</view>
+
+		<!-- 医师资格证 (qualificationImageUrl) -->
+		<view class="section-card">
+			<text class="cert-section-title">医师资格证</text>
+			<view class="cert-upload-row">
+				<view class="cert-upload-box" @tap="pickImage('qualificationImageUrl')">
+					<image v-if="form.qualificationImageUrl" :src="form.qualificationImageUrl" class="cert-upload-img" mode="aspectFill"></image>
+					<view v-else class="cert-upload-empty">
+						<view v-if="uploadingField === 'qualificationImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="cert-doc-icon">
+							<view class="cert-doc-head"></view>
+							<view class="cert-doc-line"></view>
+							<view class="cert-doc-line short"></view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 毕业院校证书 (graduateSchoolImageUrl) -->
+		<view class="section-card">
+			<text class="cert-section-title">毕业院校证书</text>
+			<view class="cert-upload-row">
+				<view class="cert-upload-box" @tap="pickImage('graduateSchoolImageUrl')">
+					<image v-if="form.graduateSchoolImageUrl" :src="form.graduateSchoolImageUrl" class="cert-upload-img" mode="aspectFill"></image>
+					<view v-else class="cert-upload-empty">
+						<view v-if="uploadingField === 'graduateSchoolImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="cert-doc-icon">
+							<view class="cert-doc-head"></view>
+							<view class="cert-doc-line"></view>
+							<view class="cert-doc-line short"></view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 电子签名 (signatureImageUrl) -->
+		<view class="section-card">
+			<text class="cert-section-title">电子签名</text>
+			<view class="cert-upload-row">
+				<view class="cert-upload-box" @tap="pickImage('signatureImageUrl')">
+					<image v-if="form.signatureImageUrl" :src="form.signatureImageUrl" class="cert-upload-img" mode="aspectFill"></image>
+					<view v-else class="cert-upload-empty">
+						<view v-if="uploadingField === 'signatureImageUrl'" class="cert-upload-loading"><text>上传中...</text></view>
+						<view v-else class="cert-doc-icon">
+							<view class="cert-doc-head"></view>
+							<view class="cert-doc-line"></view>
+							<view class="cert-doc-line short"></view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<view class="section-card">
+			<view class="form-tip">
+				<text class="iconfont icon-ic_tips"></text>
+				<text class="tip-text">信息仅用于认证审核，平台将保障您的信息安全</text>
+			</view>
+		</view>
 
 		</scroll-view>
 
@@ -218,76 +280,128 @@
 		</scroll-view>
 
 		<!-- 底部按钮 -->
-		<view class="bottom-btn-wrap" v-if="activeTab === 0">
-			<view class="bottom-btn" @tap="submitForm">提交认证</view>
+	<view class="bottom-btn-wrap" v-if="activeTab === 0">
+		<view class="bottom-btn" :class="{ disabled: submitting || !!uploadingField }" @tap="submitForm">
+			{{ submitting ? '提交中...' : '提交认证' }}
 		</view>
+	</view>
 	</view>
 </template>
 
 <script>
+import { getDoctorInfo, uploadQualification } from '@/api/doctor';
+import { uploadDoctorImage } from '@/utils/doctorRequest';
+import { normalizeDoctorInfo } from '@/utils/siteLogo';
+
+const AUDIT_STATUS_MAP = { 0: '未提交', 1: '已通过', 2: '审核中' };
+
 export default {
 	name: 'AuthQualification',
 	data() {
 		return {
 			activeTab: 0,
-			basicStatus: '未提交',
+			auditStatus: 0,
 			recordStatus: '未备案',
+			uploadingField: '',
+			submitting: false,
+			/** 字段名与 /api/doctor/qualification POST 体完全对齐 */
 			form: {
-				avatar: '',
+				picture: '',
 				name: '',
-				clinic: '榕树家诊所',
-				institution: '',
-				profession: '',
-				title: '',
-				department: '',
-				bio: '',
-				specialties: '',
-				idNumber: '',
-				idFront: '',
-				idBack: '',
-				licenseCode: '',
-				titleCert: ''
+				hospitalName: '',
+				hospitalCareer: '',
+				hospitalTitle: '',
+				hospitalSub: '',
+				selfInfo: '',
+				hospitalDomain: '',
+				idcardNum: '',
+				idcardObverseImageUrl: '',
+				idcardReverseImageUrl: '',
+				licenseImageUrl: '',
+				licenseLocationImageUrl: '',
+				hospitalTitleImageUrl: '',
+				qualificationImageUrl: '',
+				graduateSchoolImageUrl: '',
+				signatureImageUrl: '',
+				type: 1
 			},
-			professionOptions: ['执业医师', '执业助理医师'],
-			titleOptions: ['主任医师', '副主任医师', '主治医师', '住院医师', '医师'],
+			professionOptions: ['执业医师', '助理医师'],
+			titleOptions: ['医士', '医学生', '金牌专家'],
 			departmentOptions: ['内科', '外科', '儿科', '妇科', '皮肤科', '眼科', '耳鼻喉科', '口腔科', '精神科', '中医科', '全科']
 		};
+	},
+	computed: {
+		basicStatus() {
+			return AUDIT_STATUS_MAP[this.auditStatus] || '未提交';
+		}
 	},
 	onLoad(options) {
 		if (options && options.tab) {
 			this.activeTab = Number(options.tab);
 		}
+		this.loadDoctorInfo();
 	},
 	methods: {
 		$back() { uni.navigateBack(); },
 
-		uploadAvatar() {
-			uni.chooseImage({
-				count: 1,
-				sizeType: ['compressed'],
-				sourceType: ['album', 'camera'],
-				success: (res) => {
-					this.form.avatar = res.tempFilePaths[0];
+		loadDoctorInfo() {
+			getDoctorInfo().then(res => {
+				const d = normalizeDoctorInfo(res.data || {});
+				this.auditStatus = d.auditStatus || 0;
+				// 回填表单（优先已保存值）
+				const fields = [
+					'picture', 'name', 'hospitalName', 'hospitalCareer', 'hospitalTitle',
+					'hospitalSub', 'selfInfo', 'hospitalDomain', 'idcardNum',
+					'idcardObverseImageUrl', 'idcardReverseImageUrl',
+					'licenseImageUrl', 'hospitalTitleImageUrl',
+					'qualificationImageUrl', 'graduateSchoolImageUrl', 'signatureImageUrl',
+					'type'
+				];
+				fields.forEach(k => {
+					if (d[k] !== undefined && d[k] !== null && d[k] !== '') {
+						this.form[k] = d[k];
+					}
+				});
+				// 执业证地点页字段（详情接口 typo 为 licenseLocalionImageUrl，提交接口为 licenseLocationImageUrl）
+				if (d.licenseLocalionImageUrl) {
+					this.form.licenseLocationImageUrl = d.licenseLocalionImageUrl;
 				}
+			}).catch(() => {
+				// 未登录或网络失败，静默处理，不影响填写
 			});
 		},
 
-		uploadImage(field) {
+		uploadAvatar() {
+			this.pickImage('picture');
+		},
+
+		/**
+		 * 选图 → 立即上传到 /api/doctor/upload/image → 拿到 URL 存入 form
+		 */
+		pickImage(field) {
 			uni.chooseImage({
 				count: 1,
 				sizeType: ['compressed'],
 				sourceType: ['album', 'camera'],
 				success: (res) => {
-					this.form[field] = res.tempFilePaths[0];
+					const tempPath = res.tempFilePaths[0];
+					this.uploadingField = field;
+					uploadDoctorImage(tempPath).then(res => {
+						this.form[field] = res.data.url;
+					}).catch(err => {
+						uni.showToast({ title: String(err) || '上传失败', icon: 'none' });
+					}).finally(() => {
+						this.uploadingField = '';
+					});
 				}
 			});
 		},
 
 		pickField(field) {
 			const maps = {
-				profession: this.professionOptions,
-				title: this.titleOptions,
-				department: this.departmentOptions
+				hospitalCareer: this.professionOptions,
+				hospitalTitle: this.titleOptions,
+				hospitalSub: this.departmentOptions
 			};
 			if (maps[field]) {
 				uni.showActionSheet({
@@ -296,54 +410,39 @@ export default {
 						this.form[field] = maps[field][res.tapIndex];
 					}
 				});
-			} else if (field === 'institution') {
-				// TODO: 对接机构搜索接口
-				uni.showToast({ title: '机构选择开发中', icon: 'none' });
-			} else if (field === 'clinic') {
-				// TODO: 对接诊所列表
-				uni.showToast({ title: '所属选择开发中', icon: 'none' });
 			}
 		},
 
 		submitForm() {
-			if (!this.form.name) {
-				return uni.showToast({ title: '请输入姓名', icon: 'none' });
-			}
-			if (!this.form.profession) {
-				return uni.showToast({ title: '请选择职业', icon: 'none' });
-			}
-			if (!this.form.title) {
-				return uni.showToast({ title: '请选择职称', icon: 'none' });
-			}
-			if (!this.form.department) {
-				return uni.showToast({ title: '请选择科室', icon: 'none' });
-			}
-			if (!this.form.bio || this.form.bio.length < 20) {
+			if (!this.form.name)                        return uni.showToast({ title: '请输入姓名', icon: 'none' });
+			if (!this.form.hospitalCareer)              return uni.showToast({ title: '请选择职业', icon: 'none' });
+			if (!this.form.hospitalTitle)               return uni.showToast({ title: '请选择职称', icon: 'none' });
+			if (!this.form.hospitalSub)                 return uni.showToast({ title: '请选择科室', icon: 'none' });
+			if (!this.form.selfInfo || this.form.selfInfo.length < 20)
 				return uni.showToast({ title: '请填写个人简介（至少20字）', icon: 'none' });
-			}
-			if (!this.form.specialties.trim()) {
-				return uni.showToast({ title: '请填写擅长方向', icon: 'none' });
-			}
-			if (!this.form.idNumber) {
-				return uni.showToast({ title: '请输入身份证号', icon: 'none' });
-			}
-			if (!this.form.idFront || !this.form.idBack) {
+			if (!this.form.hospitalDomain.trim())       return uni.showToast({ title: '请填写擅长方向', icon: 'none' });
+			if (!this.form.idcardNum)                   return uni.showToast({ title: '请输入身份证号', icon: 'none' });
+			if (!this.form.idcardObverseImageUrl || !this.form.idcardReverseImageUrl)
 				return uni.showToast({ title: '请上传身份证正反面', icon: 'none' });
-			}
-			if (!this.form.licenseCode) {
-				return uni.showToast({ title: '请上传医师执业证', icon: 'none' });
-			}
-			if (!this.form.titleCert) {
-				return uni.showToast({ title: '请上传职称证', icon: 'none' });
-			}
-			// TODO: 对接提交认证接口
+			if (!this.form.licenseImageUrl)             return uni.showToast({ title: '请上传医师执业证（编码页）', icon: 'none' });
+			if (!this.form.licenseLocationImageUrl)     return uni.showToast({ title: '请上传医师执业证（执业地点页）', icon: 'none' });
+			if (!this.form.hospitalTitleImageUrl)       return uni.showToast({ title: '请上传职称证', icon: 'none' });
+			if (this.uploadingField)                    return uni.showToast({ title: '图片上传中，请稍候', icon: 'none' });
+
+			this.submitting = true;
 			uni.showLoading({ title: '提交中...' });
-			setTimeout(() => {
+
+			uploadQualification(this.form).then(() => {
 				uni.hideLoading();
+				this.submitting = false;
+				this.auditStatus = 2;
 				uni.showToast({ title: '提交成功，请等待审核', icon: 'none' });
-				this.basicStatus = '审核中';
 				setTimeout(() => uni.navigateBack(), 1500);
-			}, 1000);
+			}).catch(err => {
+				uni.hideLoading();
+				this.submitting = false;
+				uni.showToast({ title: String(err) || '提交失败，请重试', icon: 'none' });
+			});
 		}
 	}
 };
@@ -709,6 +808,44 @@ $required: #E93323;
 	margin-top: 12rpx;
 }
 
+// 执业证子标签
+.cert-upload-labels {
+	display: flex;
+	gap: 20rpx;
+	margin-top: 10rpx;
+}
+
+.cert-upload-label {
+	width: 200rpx;
+	text-align: center;
+	font-size: 22rpx;
+	color: #999;
+}
+
+// 上传中状态
+.cert-upload-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	text { font-size: 24rpx; color: #999; }
+}
+
+.avatar-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+.loading-dot {
+	font-size: 36rpx;
+	color: #ccc;
+	letter-spacing: 4rpx;
+}
+
 // 执业证 / 职称证上传
 .cert-upload-row {
 	display: flex;
@@ -886,6 +1023,8 @@ $required: #E93323;
 		font-size: 32rpx;
 		font-weight: 600;
 		color: #fff;
+
+		&.disabled { opacity: 0.6; }
 	}
 }
 </style>

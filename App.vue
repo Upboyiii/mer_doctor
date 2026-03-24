@@ -51,20 +51,20 @@
 			let that = this;
 			//获取登录配置
 			store.dispatch('GetLoginConfig');
-			//获取全局配置
-			store.dispatch('GetGlobalConfig');
+			//获取全局配置（/api/front/index/global/config/info 暂注释）
+			// store.dispatch('GetGlobalConfig');
 			//校验token是否有效,true为有效，false为无效
       store.dispatch("GetTokenIsExist");
 
-			// 主题变色
-			getTheme().then(res => {
-				that.globalData.theme = `theme${Number(res.data.value)}`
-				Cache.set('theme', `theme${Number(res.data.value)}`);
-				store.commit('Change_GLOBAL_theme', `theme${Number(res.data.value)}`)
-				// #ifdef H5
-				window.document.documentElement.setAttribute('data-theme', that.globalData.theme);
-				// #endif
-			})
+			// 主题变色（/api/front/index/color/config 暂注释）
+			// getTheme().then(res => {
+			// 	that.globalData.theme = `theme${Number(res.data.value)}`
+			// 	Cache.set('theme', `theme${Number(res.data.value)}`);
+			// 	store.commit('Change_GLOBAL_theme', `theme${Number(res.data.value)}`)
+			// 	// #ifdef H5
+			// 	window.document.documentElement.setAttribute('data-theme', that.globalData.theme);
+			// 	// #endif
+			// })
 
 			// 获取页面高度
 			uni.getSystemInfo({

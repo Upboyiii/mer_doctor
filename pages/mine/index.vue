@@ -28,13 +28,13 @@
 			</view> -->
 
 			<view class="user-row">
-				<image class="user-avatar" :src="doctorInfo.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+				<image class="user-avatar" :src="doctorInfo.picture || '/static/images/default-avatar.png'" mode="aspectFill"></image>
 				<view class="user-meta">
 					<view class="name-row">
 						<text class="user-phone">{{doctorInfo.phone || '医生'}}</text>
-						<view class="cert-tag" :class="doctorInfo.certified ? 'ok' : 'warn'">
+						<view class="cert-tag" :class="doctorInfo.auditStatus === 1 ? 'ok' : 'warn'">
 							<view class="dot"></view>
-							<text>{{doctorInfo.certified ? '已认证' : '未认证'}}</text>
+							<text>{{doctorInfo.auditStatus === 1 ? '已认证' : (doctorInfo.auditStatus === 2 ? '审核中' : '未认证')}}</text>
 						</view>
 						<view class="cert-tag warn">
 							<view class="dot"></view>
@@ -116,6 +116,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import CertPopup from '@/components/certPopup/index.vue';
+import { getDoctorInfo } from '@/api/doctor';
+import { normalizeDoctorInfo } from '@/utils/siteLogo';
 
 export default {
 	name: 'MineIndex',
@@ -126,7 +128,10 @@ export default {
 			showCertPopup: false,
 			showCustomerSheet: false,
 			doctorInfo: {
-				certified: false  // TODO: 从后端获取
+				phone: '',
+				picture: '',
+				auditStatus: 0,   // 0未审核 1通过 2失败
+				onlineStatus: 2   // 1接诊中 2离线
 			},
 			showAmount: false,
 			settlementAmount: '0.00',
@@ -157,14 +162,24 @@ export default {
 	onPullDownRefresh() { this.loadData(() => uni.stopPullDownRefresh()) },
 	methods: {
 		loadData(cb) {
-			// TODO: 获取医生信息（包含认证状态）
-			// getDoctorInfo().then(res => { this.doctorInfo = res.data })
-			cb && cb();
+			getDoctorInfo().then(res => {
+				const d = normalizeDoctorInfo(res.data || {});
+				this.doctorInfo = {
+					phone: d.phone || '',
+					picture: d.picture || '',
+					auditStatus: d.auditStatus || 0,
+					onlineStatus: d.onlineStatus || 2
+				};
+				// 在线状态同步
+				this.isOnline = d.onlineStatus === 1;
+			}).catch(() => {}).finally(() => {
+				cb && cb();
+			});
 		},
 
 		// 统一跳转入口，未认证时拦截并弹窗
 		toPage(url, skipCertCheck) {
-			if (!skipCertCheck && !this.doctorInfo.certified) {
+			if (!skipCertCheck && this.doctorInfo.auditStatus !== 1) {
 				this.showCertPopup = true;
 				return;
 			}
@@ -178,7 +193,7 @@ export default {
 		},
 		toMessage() { uni.navigateTo({ url: '/pages/services/message' }) },
 		toApplySettle() {
-			if (!this.doctorInfo.certified) {
+			if (this.doctorInfo.auditStatus !== 1) {
 				this.showCertPopup = true;
 				return;
 			}

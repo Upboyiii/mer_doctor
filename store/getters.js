@@ -8,7 +8,7 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-import { normalizeLogoFromConfig } from '@/utils/siteLogo';
+import { getLogoUrl, getMobileLoginLogoUrl, normalizeLogoFromConfig } from '@/utils/siteLogo';
 
 export default {
 	token: state => state.app.token,  // 用户登录
@@ -37,6 +37,10 @@ export default {
 	selectMerchantRole:state => state.app.selectMerchantRole,
 	isAdvertisement: state => state.app.isAdvertisement,
 	merMemberInfo: state => state.app.merMemberInfo,
-	/** 与登录页顶部 Logo 同源（login/config：logo / mobileLoginLogo） */
+	/** PC端 logo（login/config: logo 字段） */
+	logoUrl: state => getLogoUrl(state.app.globalData || {}),
+	/** 移动端登录 logo（login/config: mobileLoginLogo 字段） */
+	mobileLoginLogoUrl: state => getMobileLoginLogoUrl(state.app.globalData || {}),
+	/** 兼容旧引用：优先 mobileLoginLogo，其次 logo */
 	siteLogoUrl: state => normalizeLogoFromConfig(state.app.globalData || {})
 };

@@ -52,6 +52,7 @@ import Cache from '@/utils/cache';
 import navBar from '@/components/navBar';
 import { mapGetters } from 'vuex';
 import animationType from '@/utils/animationType.js';
+import { logoutApi } from '@/api/doctor';
 
 const app = getApp();
 export default {
@@ -85,9 +86,11 @@ export default {
 				content: '确定要退出登录吗？',
 				success: (res) => {
 					if (res.confirm) {
-						this.$store.commit('LOGOUT');
-						uni.reLaunch({
-							url: '/pages/users/login/index'
+						logoutApi().catch(() => {}).finally(() => {
+							this.$store.commit('LOGOUT');
+							uni.reLaunch({
+								url: '/pages/users/login/index'
+							});
 						});
 					}
 				}

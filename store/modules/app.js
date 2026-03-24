@@ -10,12 +10,11 @@
 import Auth from '../../libs/wechat';
 import {
 	getUserInfoApi,
-	getLogout
 } from "../../api/user.js";
 import {
 	getTheme,
-	tokenIsExistApi
 } from '../../api/api.js';
+import { tokenIsExistApi, logoutApi as getLogout } from '../../api/doctor.js';
 import {
 	LOGIN_STATUS,
 	UID,
@@ -33,9 +32,10 @@ import {
 } from '../../config/cache';
 import util from '../../utils/util';
 import {
-	globalConfigApi, loginConfigApi
+	globalConfigApi
 } from "../../api/public";
-import { normalizeLogoFromConfig } from "../../utils/siteLogo";
+import { loginConfigApi } from "../../api/doctor";
+import { getLogoUrl, getMobileLoginLogoUrl } from "../../utils/siteLogo";
 import store from "../index";
 import Routine from "../../libs/routine";
 const state = {
@@ -239,11 +239,15 @@ const mutations = {
 		Cache.set('publicLoginType', data.wechatBrowserVisit);
 		//小程序手机号校验类型（多选）1微信小程序验证 2短信验证
 		state.globalData.routinePhoneVerification = data.routinePhoneVerification;
-		// 登录页 / 我的 / 关于我们 共用（接口字段 logo 或 mobileLoginLogo）
-		const logoUrl = normalizeLogoFromConfig(data);
-		state.globalData.mobileLoginLogo = logoUrl;
+		// logo（PC端/通用）
+		const logoUrl = getLogoUrl(data);
+		state.globalData.logo = logoUrl;
+		uni.setStorageSync('logo', logoUrl);
+		// mobileLoginLogo（移动端登录页 / 我的 / 关于我们）
+		const mobileLoginLogoUrl = getMobileLoginLogoUrl(data);
+		state.globalData.mobileLoginLogo = mobileLoginLogoUrl;
+		uni.setStorageSync('mobileLoginLogo', mobileLoginLogoUrl);
 		Cache.set(GLOBAL_DATA, state.globalData);
-		uni.setStorageSync('mobileLoginLogo', logoUrl);
 	},
 	//修改globalData中的值，分销码，id等
 	Change_GLOBAL_DATA_Spread(state, data) {
@@ -286,17 +290,16 @@ const actions = {
 		state,
 		commit
 	}) {
-		return new Promise(reslove => {
-			globalConfigApi().then(res => {
-				let data = res.data;
-				Cache.set('imgHost', data.imageDomain + '/');
-				commit('Change_GLOBAL_DATA', data)
-			});
-		}).catch(err => {
-			return util.Tips({
-				title: err
-			});
-		});
+		// /api/front/index/global/config/info 暂未迁移至 /api/doctor/，先注释
+		// return new Promise(reslove => {
+		// 	globalConfigApi().then(res => {
+		// 		let data = res.data;
+		// 		Cache.set('imgHost', data.imageDomain + '/');
+		// 		commit('Change_GLOBAL_DATA', data)
+		// 	});
+		// }).catch(err => {
+		// 	return util.Tips({ title: err });
+		// });
 	},
 	//获取登录配置
 	GetLoginConfig({
@@ -319,19 +322,18 @@ const actions = {
 		state,
 		commit
 	}) {
-		return new Promise(reslove => {
-			getTheme().then(res => {
-				Cache.set('theme', `theme${Number(res.data.value)}`);
-				commit('Change_GLOBAL_theme', `theme${Number(res.data.value)}`)
-				// #ifdef H5
-				window.document.documentElement.setAttribute('data-theme', res.data.value);
-				// #endif
-			})
-		}).catch(err => {
-			return util.Tips({
-				title: err
-			});
-		});
+		// /api/front/index/color/config 暂未迁移至 /api/doctor/，先注释
+		// return new Promise(reslove => {
+		// 	getTheme().then(res => {
+		// 		Cache.set('theme', `theme${Number(res.data.value)}`);
+		// 		commit('Change_GLOBAL_theme', `theme${Number(res.data.value)}`)
+		// 		// #ifdef H5
+		// 		window.document.documentElement.setAttribute('data-theme', res.data.value);
+		// 		// #endif
+		// 	})
+		// }).catch(err => {
+		// 	return util.Tips({ title: err });
+		// });
 	},
 	/**
 	 * 校验token是否有效,true为有效，false为无效

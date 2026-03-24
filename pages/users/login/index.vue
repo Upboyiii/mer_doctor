@@ -108,16 +108,16 @@
 	import {
 		loginH5,
 		loginMobile,
-		registerVerify,
-		register,
-	} from "@/api/user";
+		sendCode as sendCodeApi,
+		loginConfigApi,
+	} from "@/api/doctor";
+	import { register } from "@/api/user";
 	let app = getApp();
 	import {
-		loginConfigApi,
 		appAuth,
 		appleLogin
 	} from "@/api/public";
-	import { normalizeLogoFromConfig } from "@/utils/siteLogo";
+	import { normalizeDoctorInfo } from "@/utils/siteLogo";
 	import {
 		VUE_APP_API_URL
 	} from "@/utils";
@@ -148,9 +148,9 @@
 			Verify,
 		},
 		computed: {
-			...mapGetters(['userInfo', 'isLogin', 'globalData', 'siteLogoUrl']),
+			...mapGetters(['userInfo', 'isLogin', 'globalData', 'mobileLoginLogoUrl']),
 			displayLogo() {
-				return this.logoUrl || this.siteLogoUrl;
+				return this.mobileLoginLogoUrl;
 			}
 		},
 		data: function() {
@@ -163,7 +163,7 @@
 				captcha: "",
 				formItem: 1,
 				type: "login",
-				logoUrl: "",
+	
 				keyCode: "",
 				codeUrl: "",
 				codeVal: "",
@@ -345,9 +345,8 @@
 				let that = this
 			},
 			async getLogoImage() {
-				let that = this;
 				loginConfigApi().then(res => {
-					that.logoUrl = normalizeLogoFromConfig(res.data);
+					this.$store.commit('Change_GLOBAL_DATA_loginConfig', res.data);
 				});
 			},
 			/**
@@ -452,18 +451,18 @@
 				if (!/^1(3|4|5|7|8|9|6)\d{9}$/i.test(that.phone)) return that.$util.Tips({
 					title: '请输入正确的手机号码'
 				});
-				registerVerify(that.phone)
-					.then(res => {
-						that.$util.Tips({
-							title: res.message
-						});
-						that.sendCode();
-					})
-					.catch(err => {
-						return that.$util.Tips({
-							title: err
-						});
+			sendCodeApi(that.phone)
+				.then(res => {
+					that.$util.Tips({
+						title: res.message || '验证码已发送'
 					});
+					that.sendCode();
+				})
+				.catch(err => {
+					return that.$util.Tips({
+						title: err
+					});
+				});
 			},
 			code: Debounce(function() {
 				let that = this;
@@ -498,11 +497,11 @@
 				uni.showLoading({
 					title: '正在登录中'
 				});
-				loginH5({
-						phone: that.phone,
-						password: that.password,
-						spread_spid: that.$Cache.get("spread")
-					}).then(({
+			loginH5({
+					phone: that.phone,
+					password: that.password,
+					spreadPid: that.$Cache.get("spread")
+				}).then(({
 						data
 					}) => {
 						that.$store.commit("LOGIN", {
@@ -518,17 +517,17 @@
 						});
 					});
 			}),
-			getUserInfo(data) {
-        this.$store.commit("SETUID", data.id);
-				this.$store.dispatch("GetTokenIsExist");
-				//分销绑定
-				silenceBindingSpread(true, this.globalData.spread);
-				this.$store.dispatch('GetGlobalConfig');
-				this.$store.commit('UPDATE_USERINFO', {
-					avatar: data.avatar,
-          nickname: data.nickname,
-					phone: data.phone
-				});
+		getUserInfo(data) {
+			const d = normalizeDoctorInfo(data);
+			this.$store.commit("SETUID", d.id);
+			this.$store.dispatch("GetTokenIsExist");
+			//分销绑定
+			silenceBindingSpread(true, this.globalData.spread);
+			this.$store.commit('UPDATE_USERINFO', {
+				avatar: d.avatar,
+				nickname: d.nickname,
+				phone: d.phone
+			});
 				let backUrl = this.$Cache.get(BACK_URL) || "/pages/workbench/index";
         this.$store.commit('Change_Advertisement', false);
 				if (backUrl.indexOf('/pages/users/login/index') !== -1) {
