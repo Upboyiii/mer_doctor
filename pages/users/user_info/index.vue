@@ -1,441 +1,330 @@
 <template>
-	<view :data-theme="theme">
-		<form @submit="formSubmit" report-submit='true'>
-			<view class='personal-data borderPad'>
-				<view class='list borRadius14 bg--w111-fff mt20'>
-					<view class="item acea-row row-between-wrapper">
-						<view>头像</view>
-						<!-- #ifndef MP -->
-						<view class="pictrue" @click.stop='uploadpic'>
-							<image :src='avatarUrl'></image>
-							<image :src='editPng' class="alter"></image>
-						</view>
-						<!-- #endif -->
-						<!-- #ifdef MP -->
-						<view class="pictrue">
-							<button class="avatar-wrapper" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
-								<image class="avatar" :src="avatarUrl"></image>
-							</button>
-							<image :src='editPng' class="alter"></image>
-						</view>
-						<!-- #endif -->
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view>昵称</view>
-						<view class='input fontColor'>
-							<!-- #ifndef MP -->
-							<input type='text' name='nickname' :value='nickname' maxlength="20"></input>
-							<!-- #endif -->
-							<!-- #ifdef MP -->
-							<input type="nickname" name='nickname' :value='nickname' class="weui-input"
-								placeholder="请输入昵称" maxlength="20"/>
-							<!-- #endif -->
-						</view>
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view>性别</view>
-						<view class='input'>
-							<picker @change="bindSexChange" :value="sexindex" :range="sexList" range-key="name">
-								<view class="uni-input">{{sexList[sexindex].name}}</view>
-							</picker>
-						</view>
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view>出生日期</view>
-						<view class='input'>
-							<picker mode="date" :value="date"
-								@change="bindDateChange">
-								<view class="uni-input">{{date}}</view>
-							</picker>
-						</view>
-					</view>
-					<view class='item acea-row row-between-wrapper'>
-						<view>地区</view>
-						<view class='input'>
-							<picker mode="multiSelector" :value="cityIndex" :range="cityData" @change="bindCityChange"
-								@columnchange="selMonitor">
-								<view class="uni-input">{{addressNode.province&&addressNode.city ? addressNode.province + ' , ' + addressNode.city : '-'}}
-								</view>
-							</picker>
-						</view>
-					</view>
-				</view>
-				<button class='modifyBnt bg-color' formType="submit">保存修改</button>
+	<view class="profile-page">
+		<doctor-nav-bar title="个人介绍" />
+
+		<!-- 头部卡片 -->
+		<view class="header-card">
+			<view class="avatar-wrap">
+				<image class="avatar" :src="info.picture || '/static/images/f.png'" mode="aspectFill" />
 			</view>
-		</form>
+			<view class="header-info">
+				<view class="name-row">
+					<text class="name">{{ info.name || '未设置' }}</text>
+					<text class="sex-tag" v-if="info.sex === 1">♂</text>
+					<text class="sex-tag female" v-else-if="info.sex === 2">♀</text>
+				</view>
+				<view class="title-row" v-if="info.hospitalTitle || info.hospitalCareer">
+					<text class="title-text">{{ info.hospitalTitle }}</text>
+					<text class="divider" v-if="info.hospitalTitle && info.hospitalCareer">·</text>
+					<text class="title-text">{{ info.hospitalCareer }}</text>
+				</view>
+				<view class="hospital-row" v-if="info.hospitalName">
+					<text class="hospital-name">{{ info.hospitalName }}</text>
+					<text class="hospital-level" v-if="info.hospitalLevel">{{ info.hospitalLevel }}</text>
+				</view>
+				<view class="dept-row" v-if="info.hospitalSub">
+					<text class="dept-text">{{ info.hospitalSub }}</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 数据统计 -->
+		<view class="stats-row">
+			<view class="stat-item">
+				<text class="stat-value">{{ info.score || '-' }}</text>
+				<text class="stat-label">评分</text>
+			</view>
+			<view class="stat-divider"></view>
+			<view class="stat-item">
+				<text class="stat-value">{{ info.treatNum || 0 }}</text>
+				<text class="stat-label">服务人数</text>
+			</view>
+			<view class="stat-divider"></view>
+			<view class="stat-item">
+				<text class="stat-value">{{ onlineText }}</text>
+				<text class="stat-label">接诊状态</text>
+			</view>
+		</view>
+
+		<!-- 擅长领域 -->
+		<view class="section-card" v-if="info.hospitalDomain">
+			<text class="section-title">擅长领域</text>
+			<text class="section-content">{{ info.hospitalDomain }}</text>
+		</view>
+
+		<!-- 个人简介 -->
+		<view class="section-card" v-if="info.selfInfo">
+			<text class="section-title">个人简介</text>
+			<text class="section-content">{{ info.selfInfo }}</text>
+		</view>
+
+		<!-- 基本信息 -->
+		<view class="info-card">
+			<text class="section-title">基本信息</text>
+			<view class="info-row">
+				<text class="info-label">手机号</text>
+				<text class="info-value">{{ maskedPhone }}</text>
+			</view>
+			<view class="info-row" v-if="info.email">
+				<text class="info-label">邮箱</text>
+				<text class="info-value">{{ info.email }}</text>
+			</view>
+			<view class="info-row">
+				<text class="info-label">注册时间</text>
+				<text class="info-value">{{ info.createTime || '-' }}</text>
+			</view>
+		</view>
+
+		<!-- 底部空白 -->
+		<view class="footer-spacer"></view>
 	</view>
 </template>
 
 <script>
-	// +----------------------------------------------------------------------
-	// | CRMEB [ CRMEB赋能开发者，助力企业发展 ]
-	// +----------------------------------------------------------------------
-	// | Copyright (c) 2016~2026 https://www.crmeb.com All rights reserved.
-	// +----------------------------------------------------------------------
-	// | Licensed CRMEB并不是自由软件，未经许可不能去掉CRMEB相关版权
-	// +----------------------------------------------------------------------
-	// | Author: CRMEB Team <admin@crmeb.com>
-	// +----------------------------------------------------------------------
-	import {
-		userEdit
-	} from '@/api/user.js';
-	import {
-		getCity
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		Debounce
-	} from '@/utils/validate.js'
-	import city from "../static/js/city.js";
-	let app = getApp();
-	const CACHE_ADDRESS = {};
-	export default {
-		data() {
-			return {
-				memberInfo: {
-					avatar: '',
-				},
-				userIndex: 0,
-				wechat: false,
-				theme: app.globalData.theme,
-				editPng: '../../../static/images/alert1.png',
-				sexList: [{
-						val: 0,
-						name: '未知'
-					},
-					{
-						val: 1,
-						name: '男'
-					},
-					{
-						val: 2,
-						name: '女'
-					}
-				],
-				sexindex: 0,
-				date: '2000-01-01',
-				sex: 0,
-				cityData: city,
-				cityIndex: 0,
-				addressNode: {
-					province: "请选择城市",
-					city: ""
-				},
-				provinceList: [],
-				cityAllList: [],
-				avatarUrl: "",
-				nickname: '',
-				userInfo: null
-			};
+import { getDoctorInfo } from '@/api/doctor';
+
+export default {
+	name: 'DoctorProfile',
+	data() {
+		return {
+			info: {}
+		};
+	},
+	computed: {
+		onlineText() {
+			return this.info.onlineStatus === 1 ? '接诊中' : '离线';
 		},
-		computed: {
-			...mapGetters(['isLogin']),
-			startDate() {
-				return this.getDate('start');
-			},
-			endDate() {
-				return this.getDate('end');
+		maskedPhone() {
+			const p = this.info.phone || '';
+			if (p.length >= 11) {
+				return p.slice(0, 3) + '****' + p.slice(7);
 			}
-
-		},
-		onLoad() {
-			//this.loadAddress(1, 1);
-			if (!this.isLogin) {
-				toLogin();
-			} else {
-				this.getUserInfo();
-			}
-			this.getAddressData();
-			// #ifdef H5
-			let ua = navigator.userAgent.toLowerCase();
-			if (ua.match(/MicroMessenger/i) == "micromessenger") {
-				this.$set(this, 'wechat', false);
-			} else {
-				this.$set(this, 'wechat', true);
-			}
-			// #endif
-			switch (this.theme) {
-				case 'theme2':
-					this.editPng = '../static/images/alert2.png'
-					break;
-				case 'theme3':
-					this.editPng = '../static/images/alert3.png'
-					break;
-				case 'theme4':
-					this.editPng = '../static/images/alert4.png'
-					break;
-				case 'theme5':
-					this.editPng = '../static/images/alert5.png'
-					break;
-				default:
-					this.editPng = '../static/images/alert1.png'
-					break;
-			}
-		},
-		methods: {
-			getUserInfo(data) {
-				this.$store.dispatch('USERINFO').then(res => {
-					this.userInfo = res;
-					this.avatarUrl = this.userInfo.avatar ? this.userInfo.avatar : '../static/images/f.png';
-					this.nickname = this.userInfo.nickname ? this.userInfo.nickname : '-';
-					this.date = this.userInfo.birthday || '2000-01-01';
-					this.sexindex = this.userInfo.sex;
-					this.sex = this.sexList[this.sexindex].val;
-					this.addressNode = {
-						province: this.userInfo.province,
-						city: this.userInfo.city
-					}
-				});
-			},
-			/**
-			 * 小程序端上传头像
-			 *
-			 */
-			onChooseAvatar(e) {
-				const {
-					avatarUrl
-				} = e.detail
-				uni.showLoading({
-					title: '加载中...'
-				});
-				this.$util.uploadImgs( avatarUrl, {
-					url: 'upload/image',
-					name: 'multipart',
-					model: "maintain",
-					pid: 0
-				},(res) => {
-					this.avatarUrl = res.data.url;
-					uni.hideLoading();
-				}, (err) => {
-					uni.hideLoading();
-				})
-			},
-			/**
-			 * 监听省市区滚动
-			 *
-			 */
-			selMonitor(e) {
-				const that = this
-				let column = e.detail.column
-				if (column == 0) {
-					let index = e.detail.value
-					let length = that.cityData[1].length
-					// 改变市
-					that.cityData[1].splice(0, length, ...that.cityAllList[index])
-				}
-			},
-			/**
-			 * 将省市区的数据转换为picker可用的多维数组
-			 *
-			 */
-			getAddressData() {
-				// 所有城市列表,二维数组
-				let cityAllList = [];
-				// 省列表
-				let provinceList = [];
-				// cityData为省市区的json数据
-				for (let key in this.cityData) {
-					let newDataList = [];
-					if (this.cityData[key].child) {
-						for (let key2 in this.cityData[key].child) {
-							newDataList.push(this.cityData[key].child[key2].city);
-						}
-					}
-					provinceList.push(this.cityData[key].province);
-					cityAllList.push(newDataList);
-				}
-				this.provinceList = provinceList;
-				this.cityAllList = cityAllList;
-				this.cityData = [provinceList, cityAllList[0]];
-			},
-			bindCityColumnChange(e) {
-				let column = e.detail.column
-				if (column == 0) {
-					let index = e.detail.value
-					this.cityData[1] = this.cityAllList[index]
-				}
-			},
-			bindCityChange(e) {
-				let val = e.target.value
-				this.addressNode = {
-					province: this.cityData[0][val[0]],
-					city: this.cityData[1][val[1]]
-				}
-			},
-			bindSexChange(e) {
-				this.sexindex = e.detail.value;
-				this.sex = this.sexList[this.sexindex].val;
-			},
-			bindDateChange: function(e) {
-				this.date = e.detail.value
-			},
-			getDate(type) {
-				const date = new Date();
-				let year = date.getFullYear();
-				let month = date.getMonth() + 1;
-				let day = date.getDate();
-
-				if (type === 'start') {
-					year = year - 60;
-				} else if (type === 'end') {
-					year = year + 2;
-				}
-				month = month > 9 ? month : '0' + month;
-				day = day > 9 ? day : '0' + day;
-				return `${year}-${month}-${day}`;
-			},
-			/**
-			 * 上传文件
-			 *
-			 */
-			uploadpic: function() {
-				let that = this;
-				that.$util.uploadImageOne({
-					url: 'upload/image',
-					name: 'multipart',
-					model: "maintain",
-					pid: 0,
-					count: 1
-				}, function(res) {
-					that.avatarUrl = res;
-				});
-			},
-
-			/**
-			 * 提交修改
-			 */
-			formSubmit: Debounce(function(e) {
-				let that = this,
-					value = e.detail.value
-				if (!value.nickname) return that.$util.Tips({
-					title: '用户姓名不能为空'
-				});
-				value.avatar = that.avatarUrl ? that.avatarUrl : that.userInfo.avatar;
-				uni.showLoading({
-					title: '加载中...'
-				});
-
-				userEdit({
-					avatar: value.avatar,
-					birthday: that.date,
-					city: this.addressNode.city,
-					province: this.addressNode.province,
-					nickname: value.nickname,
-					sex: that.sex
-				}).then(res => {
-					uni.hideLoading();
-					that.$util.Tips({
-						title: '保存成功',
-						icon: 'success'
-					});
-					setTimeout(function() {
-						uni.reLaunch({
-							url: '/pages/user/index',
-						})
-					}, 2000);
-
-				}).catch(msg => {
-					uni.hideLoading();
-					return that.$util.Tips({
-						title: msg || '保存失败，您并没有修改'
-					});
-				});
-			})
+			return p || '-';
+		}
+	},
+	onLoad() {
+		this.loadInfo();
+	},
+	onShow() {
+		this.loadInfo();
+	},
+	methods: {
+		loadInfo() {
+			getDoctorInfo().then(res => {
+				this.info = res.data || {};
+			}).catch(() => {});
 		}
 	}
+};
 </script>
 
 <style scoped lang="scss">
-	.fontColor {
-		color: #868686;
+$primary: $theme-color;
+$bg: #F5F6FA;
+$text: #333;
+$text2: #666;
+$text3: #999;
+$card: #fff;
+
+.profile-page {
+	min-height: 100vh;
+	background: $bg;
+}
+
+.header-card {
+	margin: 20rpx 24rpx 0;
+	background: $card;
+	border-radius: 20rpx;
+	padding: 36rpx 32rpx;
+	display: flex;
+	align-items: flex-start;
+	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.avatar-wrap {
+	flex-shrink: 0;
+	margin-right: 28rpx;
+
+	.avatar {
+		width: 128rpx;
+		height: 128rpx;
+		border-radius: 50%;
+		background: #eee;
+	}
+}
+
+.header-info {
+	flex: 1;
+	min-width: 0;
+	padding-top: 4rpx;
+}
+
+.name-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8rpx;
+
+	.name {
+		font-size: 36rpx;
+		font-weight: 600;
+		color: $text;
+		margin-right: 12rpx;
 	}
 
-	.personal-data .wrapper {
-		margin: 10rpx 0;
-		background-color: #fff;
-		padding: 36rpx 30rpx 13rpx 30rpx;
-	}
-
-	.personal-data .wrapper .title {
-		margin-bottom: 30rpx;
-		font-size: 32rpx;
-		color: #282828;
-	}
-  .list{
-    padding: 0 30rpx;
-  }
-	.personal-data .list .item {
-		border-bottom: 1rpx solid #f2f2f2;
-		padding: 36rpx 0;
-		font-size: 32rpx;
-		color: #333333;
-	}
-
-	.personal-data .list .item .phone {
-		width: 160rpx;
-		height: 56rpx;
+	.sex-tag {
 		font-size: 24rpx;
-		color: #fff;
-		line-height: 56rpx;
-		border-radius: 32rpx
-	}
-
-	.personal-data .list .item .pictrue {
-		width: 80rpx;
-		height: 80rpx;
-		position: relative;
-	}
-
-	.personal-data .list .item .pictrue image {
-    width: 80rpx;
-    height: 80rpx;
+		color: #4A90D9;
+		background: rgba(74, 144, 217, 0.1);
+		width: 36rpx;
+		height: 36rpx;
 		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&.female {
+			color: #E96B8A;
+			background: rgba(233, 107, 138, 0.1);
+		}
+	}
+}
+
+.title-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 6rpx;
+
+	.title-text {
+		font-size: 26rpx;
+		color: $primary;
+		font-weight: 500;
 	}
 
-	.personal-data .list .item .pictrue .alter {
-		width: 30rpx;
-		height: 30rpx;
-		border-radius: 50%;
-		position: absolute;
-		bottom: 0;
-		right: 0;
+	.divider {
+		margin: 0 8rpx;
+		color: #ccc;
+		font-size: 22rpx;
+	}
+}
+
+.hospital-row {
+	display: flex;
+	align-items: center;
+	margin-bottom: 4rpx;
+
+	.hospital-name {
+		font-size: 26rpx;
+		color: $text2;
+		margin-right: 10rpx;
 	}
 
-	.personal-data .list .item .input {
-		width: 415rpx;
-		text-align: right;
-		color: #666666;
+	.hospital-level {
+		font-size: 20rpx;
+		color: $primary;
+		background: rgba(86, 194, 184, 0.1);
+		padding: 2rpx 10rpx;
+		border-radius: 6rpx;
+	}
+}
+
+.dept-row {
+	.dept-text {
+		font-size: 24rpx;
+		color: $text3;
+	}
+}
+
+.stats-row {
+	margin: 20rpx 24rpx 0;
+	background: $card;
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	padding: 28rpx 0;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+}
+
+.stat-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	.stat-value {
+		font-size: 34rpx;
+		font-weight: 600;
+		color: $text;
+		margin-bottom: 6rpx;
 	}
 
-	.personal-data .list .item .input .id {
-		width: 365rpx;
+	.stat-label {
+		font-size: 22rpx;
+		color: $text3;
 	}
+}
 
-	.personal-data .list .item .input .iconfont {
-		font-size: 35rpx;
-	}
+.stat-divider {
+	width: 1rpx;
+	height: 56rpx;
+	background: #EAEEF2;
+}
 
-	.personal-data .modifyBnt {
-		font-size: 32rpx;
-		color: #fff;
-		width: 690rpx;
-		height: 90rpx;
-		border-radius: 50rpx;
-		text-align: center;
-		line-height: 90rpx;
-		margin: 76rpx auto 0 auto;
+.section-card {
+	margin: 20rpx 24rpx 0;
+	background: $card;
+	border-radius: 16rpx;
+	padding: 28rpx 32rpx;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+}
+
+.section-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: $text;
+	margin-bottom: 16rpx;
+}
+
+.section-content {
+	display: block;
+	font-size: 28rpx;
+	color: $text2;
+	line-height: 1.7;
+}
+
+.info-card {
+	margin: 20rpx 24rpx 0;
+	background: $card;
+	border-radius: 16rpx;
+	padding: 28rpx 32rpx;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+}
+
+.info-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 18rpx 0;
+	border-bottom: 1rpx solid #F5F5F5;
+
+	&:last-child {
+		border-bottom: none;
 	}
-	.personal-data .logOut {
-		font-size: 32rpx;
-		text-align: center;
-		width: 690rpx;
-		height: 90rpx;
-		border-radius: 45rpx;
-		margin: 30rpx auto 0 auto;
-	}
+}
+
+.info-label {
+	font-size: 28rpx;
+	color: $text3;
+	flex-shrink: 0;
+}
+
+.info-value {
+	font-size: 28rpx;
+	color: $text;
+	text-align: right;
+}
+
+.footer-spacer {
+	height: 60rpx;
+}
 </style>

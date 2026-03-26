@@ -201,6 +201,27 @@
 			}
 		},
 		{
+			"path": "pages/auth/hospital-search",
+			"style": {
+				"navigationBarTitleText": "选择诊所",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/auth/department-search",
+			"style": {
+				"navigationBarTitleText": "选择科室",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/auth/merchant-search",
+			"style": {
+				"navigationBarTitleText": "选择门店",
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/user/index",
 			"style": {
 				"navigationBarTitleText": "设置",
@@ -232,19 +253,13 @@
 						}
 					}
 				},
-				{
-					"path": "user_info/index",
-					"style": {
-						"navigationBarTitleText": "个人资料",
-						"app-plus": {
-							// #ifdef APP-PLUS
-							"titleNView": {
-								"type": "default"
-							}
-							// #endif
-						}
-					}
-				},
+			{
+				"path": "user_info/index",
+				"style": {
+					"navigationBarTitleText": "个人介绍",
+					"navigationStyle": "custom"
+				}
+			},
 				{
 					"path": "user_setting/index",
 					"style": {
@@ -258,17 +273,11 @@
 						}
 					}
 				},
-				{
-					"path": "user_pwd_edit/index",
-					"style": {
-						"navigationBarTitleText": "修改密码",
-						"app-plus": {
-							// #ifdef APP-PLUS
-							"titleNView": {
-								"type": "default"
-							}
-							// #endif
-						}
+			{
+				"path": "user_pwd_edit/index",
+				"style": {
+					"navigationBarTitleText": "修改密码",
+					"navigationStyle": "custom"
 					}
 				},
 				{

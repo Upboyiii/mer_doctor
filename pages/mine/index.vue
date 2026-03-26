@@ -3,6 +3,20 @@
 		<!-- 资质认证弹窗 -->
 		<cert-popup :show.sync="showCertPopup"></cert-popup>
 
+		<!-- 状态切换确认弹窗 -->
+		<view class="status-mask" v-if="showStatusSheet" @tap.self="showStatusSheet = false">
+			<view class="status-action-wrap" @tap.stop>
+				<view class="status-action-card">
+					<text class="status-sheet-title">确认切换状态</text>
+					<text class="status-sheet-desc">{{isOnline ? '切换后将暂停接收新的问诊订单' : '切换后将开始接收新的问诊订单'}}</text>
+					<view class="status-btn-row">
+						<view class="status-btn cancel" @tap="showStatusSheet = false"><text>取消</text></view>
+						<view class="status-btn confirm" @tap="confirmToggleStatus"><text>{{isOnline ? '切换为休息中' : '切换为接单中'}}</text></view>
+					</view>
+				</view>
+			</view>
+		</view>
+
 		<!-- 联系客服：底部双块操作表（致电 / 取消） -->
 		<view class="customer-mask" v-if="showCustomerSheet" @tap.self="closeCustomerSheet">
 			<view class="customer-action-wrap" @tap.stop>
@@ -36,9 +50,9 @@
 							<view class="dot"></view>
 							<text>{{doctorInfo.auditStatus === 1 ? '已认证' : (doctorInfo.auditStatus === 2 ? '审核中' : '未认证')}}</text>
 						</view>
-						<view class="cert-tag warn">
+						<view class="cert-tag" :class="doctorInfo.mchId ? 'ok' : 'warn'">
 							<view class="dot"></view>
-							<text>未备案</text>
+							<text>{{doctorInfo.mchId ? '已备案' : '未备案'}}</text>
 						</view>
 					</view>
 					<view class="sub-row">
@@ -116,7 +130,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import CertPopup from '@/components/certPopup/index.vue';
-import { getDoctorInfo } from '@/api/doctor';
+import { getDoctorInfo, switchOnlineStatus } from '@/api/doctor';
 import { normalizeDoctorInfo } from '@/utils/siteLogo';
 
 export default {
@@ -127,11 +141,13 @@ export default {
 			isOnline: true,
 			showCertPopup: false,
 			showCustomerSheet: false,
+			showStatusSheet: false,
 			doctorInfo: {
 				phone: '',
 				picture: '',
 				auditStatus: 0,   // 0未审核 1通过 2失败
-				onlineStatus: 2   // 1接诊中 2离线
+				onlineStatus: 2,  // 1接诊中 2离线
+				mchId: 0          // 门店ID，有值则已备案
 			},
 			showAmount: false,
 			settlementAmount: '0.00',
@@ -168,7 +184,8 @@ export default {
 					phone: d.phone || '',
 					picture: d.picture || '',
 					auditStatus: d.auditStatus || 0,
-					onlineStatus: d.onlineStatus || 2
+					onlineStatus: d.onlineStatus || 2,
+					mchId: d.mchId || 0
 				};
 				// 在线状态同步
 				this.isOnline = d.onlineStatus === 1;
@@ -188,8 +205,17 @@ export default {
 
 		toggleAmount() { this.showAmount = !this.showAmount },
 		toggleStatus() {
-			this.isOnline = !this.isOnline;
-			uni.showToast({ title: this.isOnline ? '已切换为接单中' : '已切换为休息中', icon: 'none' });
+			this.showStatusSheet = true;
+		},
+		confirmToggleStatus() {
+			this.showStatusSheet = false;
+			const newStatus = this.isOnline ? 2 : 1;
+			switchOnlineStatus({ onlineStatus: newStatus }).then(() => {
+				this.isOnline = newStatus === 1;
+				uni.showToast({ title: this.isOnline ? '已切换为接单中' : '已切换为休息中', icon: 'none' });
+			}).catch(err => {
+				uni.showToast({ title: String(err) || '切换失败', icon: 'none' });
+			});
 		},
 		toMessage() { uni.navigateTo({ url: '/pages/services/message' }) },
 		toApplySettle() {
@@ -220,7 +246,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary: #56C2B8;
+$primary: $theme-color;
 $primary-soft: rgba(86,194,184,0.08);
 $text: #333;
 $text2: #666;
@@ -431,5 +457,74 @@ $action-blue: #007aff;
 	font-weight: 500;
 	color: $action-blue;
 	padding: 32rpx 0;
+}
+
+// 状态切换底部弹窗
+.status-mask {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 10000;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+}
+
+.status-action-wrap {
+	padding: 0 24rpx calc(24rpx + env(safe-area-inset-bottom));
+	animation: status-sheet-in 0.28s ease-out;
+}
+
+@keyframes status-sheet-in {
+	from { transform: translateY(100%); opacity: 0.96; }
+	to   { transform: translateY(0);    opacity: 1; }
+}
+
+.status-action-card {
+	background: #fff;
+	border-radius: 24rpx;
+	text-align: center;
+	padding: 48rpx 40rpx 40rpx;
+}
+
+.status-sheet-title {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 600;
+	color: #333;
+}
+
+.status-sheet-desc {
+	display: block;
+	font-size: 26rpx;
+	color: #999;
+	margin-top: 16rpx;
+}
+
+.status-btn-row {
+	display: flex;
+	gap: 24rpx;
+	margin-top: 48rpx;
+}
+
+.status-btn {
+	flex: 1;
+	height: 88rpx;
+	border-radius: 44rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	text { font-size: 30rpx; font-weight: 500; }
+
+	&.cancel {
+		background: #F5F5F5;
+		text { color: #666; }
+	}
+
+	&.confirm {
+		background: $primary;
+		text { color: #fff; }
+	}
 }
 </style>

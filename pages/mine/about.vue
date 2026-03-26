@@ -1,11 +1,6 @@
 <template>
 	<view class="about-page">
-		<view class="nav-bar">
-			<view class="back-btn" @tap="$back">
-				<text class="iconfont icon-ic_leftarrow"></text>
-			</view>
-			<text class="nav-title">关于我们</text>
-		</view>
+		<doctor-nav-bar title="关于我们" />
 
 		<view class="content">
 			<view class="logo-shading">
@@ -34,11 +29,7 @@ export default {
 			// #endif
 		}
 	},
-	methods: {
-		$back() {
-			uni.navigateBack();
-		}
-	}
+	methods: {}
 };
 </script>
 
@@ -51,33 +42,6 @@ $text3: #999;
 .about-page {
 	min-height: 100vh;
 	background: $bg;
-}
-
-.nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	padding: calc(88rpx + env(safe-area-inset-top)) 30rpx 24rpx;
-	background: #fff;
-	border-bottom: 1rpx solid #f0f0f0;
-
-	.back-btn {
-		position: absolute;
-		left: 24rpx;
-		bottom: 24rpx;
-		padding: 8rpx 16rpx 8rpx 8rpx;
-		.iconfont {
-			font-size: 36rpx;
-			color: $text;
-		}
-	}
-
-	.nav-title {
-		font-size: 34rpx;
-		font-weight: 600;
-		color: #111;
-	}
 }
 
 .content {

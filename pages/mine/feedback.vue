@@ -1,11 +1,6 @@
 <template>
 	<view class="feedback-page">
-		<view class="nav-bar">
-			<view class="back-btn" @tap="$back">
-				<text class="iconfont icon-ic_leftarrow"></text>
-			</view>
-			<text class="nav-title">意见反馈</text>
-		</view>
+		<doctor-nav-bar title="意见反馈" />
 
 		<view class="form-card">
 			<!-- 问题反馈类型 -->
@@ -103,9 +98,6 @@ export default {
 		this.options = options;
 	},
 	methods: {
-		$back() {
-			uni.navigateBack();
-		},
 		addImages() {
 			const remain = 9 - this.images.length;
 			if (remain <= 0) return;
@@ -169,33 +161,6 @@ $border: #eee;
 	background: $bg;
 	padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
-}
-
-.nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	padding: calc(88rpx + env(safe-area-inset-top)) 30rpx 24rpx;
-	background: $card;
-	border-bottom: 1rpx solid #f0f0f0;
-
-	.back-btn {
-		position: absolute;
-		left: 24rpx;
-		bottom: 24rpx;
-		padding: 8rpx 16rpx 8rpx 8rpx;
-		.iconfont {
-			font-size: 36rpx;
-			color: $text;
-		}
-	}
-
-	.nav-title {
-		font-size: 34rpx;
-		font-weight: 600;
-		color: #111;
-	}
 }
 
 .form-card {

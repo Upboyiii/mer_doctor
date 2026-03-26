@@ -1,11 +1,8 @@
 <template>
-	<view class="announce-page">
-		<view class="nav-bar">
-			<view class="back-btn" @tap="$back"><text class="back-icon">‹</text></view>
-			<text class="nav-title">{{id ? '公告详情' : '公告列表'}}</text>
-		</view>
+	<view class="page">
+		<doctor-nav-bar :title="id ? '公告详情' : '公告列表'" />
 		<view class="content">
-			<view class="tip"><text>公告功能开发中...</text></view>
+			<view class="placeholder"><text>公告功能开发中...</text></view>
 		</view>
 	</view>
 </template>
@@ -14,20 +11,12 @@
 export default {
 	name: 'WorkbenchAnnouncement',
 	data() { return { id: '' } },
-	onLoad(options) { this.id = options.id || '' },
-	methods: { $back() { uni.navigateBack() } }
+	onLoad(options) { this.id = options.id || '' }
 }
 </script>
 
 <style lang="scss" scoped>
-.announce-page { min-height: 100vh; background: #F5F6FA; }
-.nav-bar {
-	display: flex; align-items: center;
-	padding: 88rpx 30rpx 20rpx; background: #fff;
-	.back-btn { padding: 10rpx 20rpx 10rpx 0; }
-	.back-icon { font-size: 48rpx; color: #333; }
-	.nav-title { font-size: 32rpx; font-weight: 600; color: #111; }
-}
+.page { min-height: 100vh; background: #F5F6FA; }
 .content { display: flex; justify-content: center; padding: 100rpx 0; }
-.tip { color: #999; font-size: 28rpx; }
+.placeholder { color: #999; font-size: 28rpx; }
 </style>

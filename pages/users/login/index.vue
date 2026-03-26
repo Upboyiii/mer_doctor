@@ -55,8 +55,8 @@
 							@click="userAgree('userprivacyinfo')" class="font_pro">《隐私协议》</text></text>
 				</checkbox-group>
 			</view>
-			<view class="logon bg-color" @click="loginMobile" v-if="current !== 0">登录</view>
-			<view class="logon bg-color" @click="submit" v-if="current === 0">登录</view>
+			<view class="logon" @click="loginMobile" v-if="current !== 0">登录</view>
+			<view class="logon" @click="submit" v-if="current === 0">登录</view>
 			<!-- #ifndef APP-PLUS -->
 			<view class="tips">
 				<view v-if="current==0" @click="current = 1">快速登录</view>
@@ -544,14 +544,16 @@
 	};
 </script>
 <style lang="scss" scoped>
+$primary: $theme-color;
+
 /deep/ .uni-checkbox-input.wx-checkbox-input-checked, /deep/.uni-radio-input.uni-radio-input-checked,/deep/.uni-checkbox-input-checked {
-   @include coupons_border_color(theme);
-  @include main_bg_color(theme);
+  border-color: $primary !important;
+  background-color: $primary !important;
   color: #FFF !important;
 }
 /deep/.wx-checkbox-input.wx-checkbox-input-checked {
-  @include coupons_border_color(theme);
-  @include main_bg_color(theme);
+  border-color: $primary !important;
+  background-color: $primary !important;
   color: #FFF !important;
 }
  /deep/ .uni-checkbox-input {
@@ -566,7 +568,7 @@
 
 	.protocol_text {
 		.font_pro {
-			@include main_color(theme);
+			color: $primary;
 		}
 	}
 
@@ -647,7 +649,7 @@
 	}
 
 	.main_color {
-		@include main_color(theme);
+		color: $primary;
 	}
 
 	.code img {
@@ -724,7 +726,7 @@
 							position: absolute;
 							right: 30rpx;
 							top: 50%;
-							color: $theme-color;
+							color: $primary;
 							font-size: 26rpx;
 							transform: translateY(-50%);
 						}
@@ -739,7 +741,7 @@
 				width: 100%;
 				height: 86rpx;
 				margin-top: 80rpx;
-				background-color: $theme-color;
+				background-color: $primary;
 				border-radius: 120rpx;
 				color: #FFFFFF;
 				font-size: 30rpx;

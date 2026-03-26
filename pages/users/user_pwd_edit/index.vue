@@ -1,249 +1,261 @@
 <template>
-	<view :data-theme="theme" class="upda_pasd borderPad">
-		<view class="ChangePassword mt20">
-			<form @submit="editPwd" report-submit='true'>
-				<view class="list bg--w111-fff borRadius14 borderPad">
-          <view class="item">{{userInfo.phone}}</view>
-					<view class="item">
-						<input type='password' placeholder='6-8位字母加数字' placeholder-class='placeholder' name="password"
-							:value="password" maxlength="18" @blur="checkPasd"></input>
+	<view class="pwd-page">
+		<doctor-nav-bar title="修改密码" />
+
+		<view class="form-wrap">
+			<view class="form-card">
+				<!-- 手机号 -->
+				<view class="form-item">
+					<text class="form-label">手机号</text>
+					<text class="form-value phone">{{ userInfo.phone }}</text>
+				</view>
+
+				<!-- 新密码 -->
+				<view class="form-item">
+					<text class="form-label">新密码</text>
+					<input
+						class="form-input"
+						type="password"
+						placeholder="请输入新密码"
+						placeholder-class="placeholder"
+						name="password"
+						v-model="password"
+						maxlength="18"
+					/>
+				</view>
+
+				<!-- 确认密码 -->
+				<view class="form-item">
+					<text class="form-label">确认密码</text>
+					<input
+						class="form-input"
+						type="password"
+						placeholder="请再次输入新密码"
+						placeholder-class="placeholder"
+						name="qr_password"
+						v-model="qr_password"
+						maxlength="18"
+					/>
+				</view>
+
+				<!-- 验证码 -->
+				<view class="form-item form-item-last">
+					<text class="form-label">验证码</text>
+					<view class="code-row">
+						<input
+							class="form-input flex1"
+							type="number"
+							placeholder="请输入验证码"
+							placeholder-class="placeholder"
+							name="captcha"
+							v-model="captcha"
+							maxlength="6"
+						/>
+						<view class="code-btn" :class="{ disabled: disabled }" @tap="code">
+							<text>{{ text }}</text>
+						</view>
 					</view>
 				</view>
-        <view class="list bg--w111-fff borRadius14 borderPad mt20">
-          <view class="item">
-            <input type='password' placeholder='确认新密码' placeholder-class='placeholder' name="qr_password"
-                   :value="qr_password" maxlength="18" @blur="checkPassword"></input>
-          </view>
-          <view class="item acea-row row-between-wrapper">
-            <input type='number' placeholder='填写验证码' placeholder-class='placeholder' class="codeIput"
-                   name="captcha" :value="captcha" maxlength="6"></input>
-            <button class="code" :class="disabled === true ? 'on' : ''" :disabled='disabled' @click="code">
-              {{ text }}
-            </button>
-          </view>
-        </view>
-				<button form-type="submit" class="confirmBnt">确认修改</button>
-			</form>
+			</view>
+
+			<!-- 页面提示 -->
+			<view class="tips-wrap">
+				<text class="tips-text">· 密码必须以字母开头，长度6~18位</text>
+				<text class="tips-text">· 只能包含字母、数字和下划线</text>
+				<text class="tips-text">· 验证码将发送至当前绑定的手机号</text>
+			</view>
+
+			<!-- 提交按钮 -->
+			<view class="submit-btn" @tap="editPwd">
+				<text>确认修改</text>
+			</view>
 		</view>
-		<Verify @success="handlerOnVerSuccess" :captchaType="'clickWord'" :imgSize="{ width: '330px', height: '155px' }"
-			ref="verify"></Verify>
+
 	</view>
 </template>
 
 <script>
-	// +----------------------------------------------------------------------
-	// | CRMEB [ CRMEB赋能开发者，助力企业发展 ]
-	// +----------------------------------------------------------------------
-	// | Copyright (c) 2016~2026 https://www.crmeb.com All rights reserved.
-	// +----------------------------------------------------------------------
-	// | Licensed CRMEB并不是自由软件，未经许可不能去掉CRMEB相关版权
-	// +----------------------------------------------------------------------
-	// | Author: CRMEB Team <admin@crmeb.com>
-	// +----------------------------------------------------------------------
-	import sendVerifyCode from "@/mixins/SendVerifyCode";
-	import {
-		phoneRegisterReset,
-		registerVerify
-	} from '@/api/api.js';
-	import {
-		toLogin
-	} from '@/libs/login.js';
-	import {
-		mapGetters
-	} from "vuex";
-	import {
-		setThemeColor
-	} from '@/utils/setTheme.js'
-	import {
-		Debounce
-	} from '@/utils/validate.js'
-	import Verify from '../components/verifition/verify.vue';
-	import {
-		updatePasswordCodeApi
-	} from "../../../api/api";
-	const app = getApp();
-	export default {
-		mixins: [sendVerifyCode],
-		components: {
-			Verify
-		},
-		data() {
-			return {
-				password: '',
-				captcha: '',
-				qr_password: '',
-				isAuto: false, //没有授权的不会自动授权
-				isShowAuth: false, //是否隐藏授权
-				theme: app.globalData.theme,
-				bgColor: ''
-			};
-		},
-		computed: mapGetters(['isLogin', 'userInfo']),
-		onLoad() {
-			if (!this.isLogin) {
-				toLogin();
-			}
-			this.bgColor = setThemeColor();
-			uni.setNavigationBarColor({
-				frontColor: '#ffffff',
-				backgroundColor: this.bgColor,
-			});
-		},
-		methods: {
-			/**
-			 * 授权回调
-			 */
-			onLoadFun: function(e) {
-				//this.getUserInfo();
-			},
-			// 授权关闭
-			authColse: function(e) {
-				this.isShowAuth = e
-			},
-			//滑块验证成功后调用
-			handlerOnVerSuccess(data) {
-				this.$refs.verify.hide();
-				this.codeSend();
-			},
-			codeSend() {
-				let that = this;
-				updatePasswordCodeApi().then(res => {
-					that.$util.Tips({
-						title: '发送成功'
-					});
-					that.sendCode();
-				}).catch(err => {
-					return that.$util.Tips({
-						title: err
-					});
-				});
-			},
-			/**
-			 * 发送验证码
-			 *
-			 */
-			code: Debounce(function(e) {
-				let that = this;
-				if (!that.userInfo.phone) return that.$util.Tips({
-					title: '手机号码不存在,无法发送验证码！'
-				});
-				if (that.qr_password != that.password) return that.$util.Tips({
-					title: '两次输入的密码不一致！'
-				});
-				that.$refs.verify.show();
-			}),
+import sendVerifyCode from '@/mixins/SendVerifyCode';
+import { resetPasswordApi, getUpdatePasswordCode } from '@/api/doctor';
+import { toLogin } from '@/libs/login.js';
+import { mapGetters } from 'vuex';
+import { Debounce } from '@/utils/validate.js';
 
-			/**
-			 * H5登录 修改密码
-			 *
-			 */
-			checkPasd(e) {
-				let that = this,
-					password = e.detail.value;
-				that.password = password;
-				// if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,8}$/i.test(password)) return that.$util.Tips({
-				if (!/^[a-zA-Z]\w{5,17}$/i.test(password)) return that.$util.Tips({
-					title: '密码格式错误，密码必须以字母开头，长度在6~8之间，只能包含字符数字和下划线'
-				});
-			},
-			checkPassword(e) {
-				let that = this,
-					qr_password = e.detail.value;
-					that.qr_password = qr_password;
-				if (qr_password != that.password) return that.$util.Tips({
-					title: '两次输入的密码不一致！'
-				});
-			},
-			editPwd: Debounce(function(e) {
-				let that = this,
-					password = e.detail.value.password,
-					qr_password = e.detail.value.qr_password,
-					captcha = e.detail.value.captcha;
-				if (!password) return that.$util.Tips({
-					title: '请输入新密码'
-				});
-				if (!qr_password) return that.$util.Tips({
-					title: '请确认新密码'
-				});
-				if (!captcha) return that.$util.Tips({
-					title: '请输入验证码'
-				});
-				uni.showLoading({
-					title: '加载中',
-					mask: true
-				});
-				phoneRegisterReset({
-					captcha: captcha,
-					password: password
-				}).then(res => {
-					uni.hideLoading();
-					return that.$util.Tips({
-						title: '操作成功'
-					}, {
-						tab: 3,
-						url: 1
-					});
-				}).catch(err => {
-					uni.hideLoading();
-					return that.$util.Tips({
-						title: err
-					});
-				});
-			})
+export default {
+	mixins: [sendVerifyCode],
+	data() {
+		return {
+			password: '',
+			captcha: '',
+			qr_password: ''
+		};
+	},
+	computed: mapGetters(['isLogin', 'userInfo']),
+	onLoad() {
+		if (!this.isLogin) {
+			toLogin();
 		}
+	},
+	methods: {
+		code: Debounce(function() {
+			if (!this.userInfo.phone) {
+				return this.$util.Tips({ title: '手机号不存在，无法发送验证码' });
+			}
+			if (this.password && this.qr_password && this.password !== this.qr_password) {
+				return this.$util.Tips({ title: '两次输入的密码不一致' });
+			}
+			getUpdatePasswordCode().then(res => {
+				this.$util.Tips({ title: '验证码已发送' });
+				this.sendCode();
+			}).catch(err => {
+				this.$util.Tips({ title: err });
+			});
+		}),
+
+		editPwd: Debounce(function() {
+			if (!this.password) {
+				return this.$util.Tips({ title: '请输入新密码' });
+			}
+			if (!/^[a-zA-Z]\w{5,17}$/.test(this.password)) {
+				return this.$util.Tips({ title: '密码格式不正确，请按页面提示设置' });
+			}
+			if (!this.qr_password) {
+				return this.$util.Tips({ title: '请确认新密码' });
+			}
+			if (this.qr_password !== this.password) {
+				return this.$util.Tips({ title: '两次输入的密码不一致' });
+			}
+			if (!this.captcha) {
+				return this.$util.Tips({ title: '请输入验证码' });
+			}
+
+			uni.showLoading({ title: '提交中...', mask: true });
+			resetPasswordApi({
+				captcha: this.captcha,
+				password: this.password
+			}).then(res => {
+				uni.hideLoading();
+				this.$util.Tips({ title: '修改成功' }, { tab: 3, url: 1 });
+			}).catch(err => {
+				uni.hideLoading();
+				this.$util.Tips({ title: err });
+			});
+		})
 	}
+};
 </script>
 
-<style lang="scss">
-	.upda_pasd {
-		height: 100vh;
+<style lang="scss" scoped>
+$primary: $theme-color;
+
+.pwd-page {
+	min-height: 100vh;
+	background: #F5F6FA;
+}
+
+.form-wrap {
+	padding: 24rpx;
+}
+
+.form-card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 0 32rpx;
+	box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.form-item {
+	display: flex;
+	align-items: center;
+	height: 104rpx;
+	border-bottom: 1rpx solid #F5F5F5;
+
+	&.form-item-last {
+		border-bottom: none;
+	}
+}
+
+.form-label {
+	width: 160rpx;
+	flex-shrink: 0;
+	font-size: 28rpx;
+	color: #333;
+}
+
+.form-value {
+	flex: 1;
+	font-size: 28rpx;
+	color: #333;
+
+	&.phone {
+		color: #666;
+		letter-spacing: 2rpx;
+	}
+}
+
+.form-input {
+	flex: 1;
+	height: 100%;
+	font-size: 28rpx;
+	color: #333;
+}
+
+.placeholder {
+	color: #C0C4CC;
+}
+
+.code-row {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	height: 100%;
+
+	.flex1 {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
+.code-btn {
+	flex-shrink: 0;
+	padding: 0 4rpx;
+	margin-left: 16rpx;
+
+	text {
+		font-size: 26rpx;
+		color: $primary;
 	}
 
-	.ChangePassword .phone {
-		font-size: 32rpx;
-		font-weight: bold;
-		text-align: center;
-		padding-top: 100rpx;
+	&.disabled text {
+		color: #C0C4CC;
 	}
+}
 
-	.ChangePassword .list .item {
-		width: 100%;
-		height: 100rpx;
-    line-height: 100rpx;
-		border-bottom: 2rpx solid #f0f0f0;
-	}
+.tips-wrap {
+	margin-top: 24rpx;
+	padding: 0 8rpx;
+}
 
-	.ChangePassword .list .item input {
-		width: 100%;
-		height: 100%;
-		font-size: 32rpx;
-	}
+.tips-text {
+	display: block;
+	font-size: 24rpx;
+	color: #999;
+	line-height: 1.9;
+}
 
-	.ChangePassword .list .item .placeholder {
-		color: #b9b9bc;
-	}
+.submit-btn {
+	margin-top: 60rpx;
+	height: 88rpx;
+	background: $primary;
+	border-radius: 44rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 
-	.ChangePassword .list .item input.codeIput {
-		width: 340rpx;
-	}
-
-	.ChangePassword .list .item .code {
-		font-size: 32rpx;
-		@include main_color(theme);
-	}
-
-	.ChangePassword .list .item .code.on {
-		color: #b9b9bc !important;
-	}
-
-	.ChangePassword .confirmBnt {
-		font-size: 28rpx;
-		height: 88rpx;
-		border-radius: 44rpx;
+	text {
+		font-size: 30rpx;
+		font-weight: 500;
 		color: #fff;
-		margin: 70rpx auto 0 auto;
-		text-align: center;
-		line-height: 88rpx;
-		@include main_bg_color(theme);
 	}
+}
 </style>

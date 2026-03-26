@@ -115,7 +115,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$primary: #56C2B8;
+$primary: $theme-color;
 $primary-soft: rgba(86,194,184,0.08);
 $text: #333;
 $text2: #666;

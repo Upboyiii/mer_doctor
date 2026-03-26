@@ -20,6 +20,12 @@ import locationManager from './utils/locationManager.js' // 导入定位管理�
 import CloseIcon from "./components/base/close-icon";
 Vue.component('CloseIcon', CloseIcon)
 
+import DoctorNavBar from './components/doctorNavBar.vue';
+Vue.component('doctor-nav-bar', DoctorNavBar);
+
+import navBarMixin from './mixins/navBarMixin';
+Vue.mixin(navBarMixin);
+
 
 Vue.prototype.$util = util;
 Vue.prototype.$config = configs;

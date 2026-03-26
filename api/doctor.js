@@ -78,3 +78,80 @@ export function getDoctorInfo() {
 export function uploadQualification(data) {
 	return dr.post('qualification', data);
 }
+
+/**
+ * 在线状态切换
+ * POST /api/doctor/register/online
+ * @param {{ onlineStatus: number }} data  1接诊中 2离线
+ */
+export function switchOnlineStatus(data) {
+	return dr.post('register/online', data);
+}
+
+/**
+ * 手机号修改密码
+ * POST /api/doctor/register/reset
+ * @param {{ captcha: string, password: string }} data
+ */
+export function resetPasswordApi(data) {
+	return dr.post('register/reset', data);
+}
+
+/**
+ * 手机号修改密码获取验证码
+ * POST /api/doctor/update/password/phone/code
+ */
+export function getUpdatePasswordCode() {
+	return dr.post('update/password/phone/code');
+}
+
+// ────────────────────────────────────────────────
+// 医院信息
+// ────────────────────────────────────────────────
+
+/**
+ * 获取职业列表
+ * GET /api/doctor/hospital/career/list
+ */
+export function getCareerList() {
+	return dr.get('hospital/career/list');
+}
+
+/**
+ * 获取医院数据（关键字搜索）
+ * GET /api/doctor/hospital/list/{keyword}
+ * @param {string} keyword
+ */
+export function getHospitalList(keyword) {
+	return dr.get(`hospital/list/${encodeURIComponent(keyword)}`);
+}
+
+/**
+ * 获取医院科室（关键字搜索）
+ * GET /api/doctor/hospital/sub/list/{keyword}
+ * @param {string} keyword
+ */
+export function getHospitalSubList(keyword) {
+	return dr.get(`hospital/sub/list/${encodeURIComponent(keyword)}`);
+}
+
+/**
+ * 获取职称列表
+ * GET /api/doctor/hospital/title/list
+ */
+export function getTitleList() {
+	return dr.get('hospital/title/list');
+}
+
+// ────────────────────────────────────────────────
+// 商户
+// ────────────────────────────────────────────────
+
+/**
+ * 商户搜索列表
+ * GET /api/doctor/merchant/search/list
+ * @param {{ keywords?, categoryIds?, isSelf?, typeIds?, page?, limit? }} params
+ */
+export function getMerchantSearchList(params) {
+	return dr.get('merchant/search/list', params);
+}

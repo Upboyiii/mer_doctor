@@ -1,12 +1,6 @@
 <template>
 	<view class="notice-page">
-		<!-- 导航栏 -->
-		<view class="nav-bar">
-			<view class="back-btn" @tap="$back">
-				<text class="iconfont icon-ic_leftarrow"></text>
-			</view>
-			<text class="nav-title">资质须知</text>
-		</view>
+		<doctor-nav-bar title="资质须知" bg-color="transparent" :show-border="false" />
 
 		<!-- 顶部Banner -->
 		<view class="banner">
@@ -79,7 +73,6 @@ export default {
 		};
 	},
 	methods: {
-		$back() { uni.navigateBack(); },
 		goCert() {
 			uni.navigateTo({ url: '/pages/auth/qualification' });
 		}
@@ -88,35 +81,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$primary: #56C2B8;
+$primary: $theme-color;
 
 .notice-page {
 	min-height: 100vh;
 	background: #F0F7F8;
 	padding-bottom: 160rpx;
-}
-
-.nav-bar {
-	display: flex;
-	align-items: center;
-	padding: 88rpx 30rpx 20rpx;
-	background: transparent;
-	position: relative;
-
-	.back-btn {
-		padding: 10rpx 20rpx 10rpx 0;
-		font-size: 36rpx;
-		color: #333;
-	}
-
-	.nav-title {
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
-		font-size: 32rpx;
-		font-weight: 600;
-		color: #111;
-	}
 }
 
 .banner {

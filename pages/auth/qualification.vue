@@ -1,12 +1,6 @@
 <template>
 	<view class="qual-page">
-		<!-- 导航栏 -->
-		<view class="nav-bar">
-			<view class="back-btn" @tap="$back">
-				<text class="iconfont icon-ic_leftarrow"></text>
-			</view>
-			<text class="nav-title">资质认证</text>
-		</view>
+		<doctor-nav-bar title="资质认证" />
 
 		<!-- Tab 标签 -->
 		<view class="tabs">
@@ -47,9 +41,12 @@
 					</view>
 
 					<!-- 机构名称 (hospitalName) -->
-					<view class="form-row">
+					<view class="form-row arrow" @tap="goHospitalSearch">
 						<text class="form-label required">机构名称</text>
-						<input class="form-input" v-model="form.hospitalName" placeholder="请输入所在医院/机构名称" placeholder-class="ph" />
+						<view class="form-input-row">
+							<text class="form-value" :class="{ ph: !form.hospitalName }">{{form.hospitalName || '请选择诊所'}}</text>
+							<text class="arrow-icon">›</text>
+						</view>
 					</view>
 
 					<!-- 职业 (hospitalCareer) -->
@@ -71,7 +68,7 @@
 					</view>
 
 					<!-- 科室 (hospitalSub) -->
-					<view class="form-row arrow" @tap="pickField('hospitalSub')">
+					<view class="form-row arrow" @tap="goDepartmentSearch">
 						<text class="form-label required">科室</text>
 						<view class="form-input-row">
 							<text class="form-value" :class="{ ph: !form.hospitalSub }">{{form.hospitalSub || '请选择科室'}}</text>
@@ -273,13 +270,70 @@
 
 		<!-- ===== 备案认证 ===== -->
 		<scroll-view v-if="activeTab === 1" scroll-y class="form-scroll">
-			<view class="empty-record">
+			<!-- 未通过基础认证 -->
+			<view v-if="auditStatus !== 1" class="empty-record">
 				<image class="empty-img" src="/static/images/empty-list.png" mode="aspectFit"></image>
 				<text class="empty-text">请先完成基础认证后再进行备案认证</text>
+			</view>
+
+			<!-- 已通过基础认证 -->
+			<view v-else>
+				<!-- 已备案状态 -->
+				<view v-if="filingInfo.mchId" class="section-card">
+					<text class="section-title">当前备案门店</text>
+					<view class="filed-merchant">
+						<image class="filed-avatar" :src="filingInfo.merchantAvatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+						<view class="filed-info">
+							<text class="filed-name">{{filingInfo.merchantName || '门店'}}</text>
+							<view class="filed-status">
+								<view class="filed-dot"></view>
+								<text>已备案</text>
+							</view>
+						</view>
+					</view>
+				</view>
+
+				<!-- 未备案 / 选择门店 -->
+				<view class="section-card">
+					<text class="section-title">{{filingInfo.mchId ? '更换备案门店' : '选择备案门店'}}</text>
+					<text class="section-hint">请选择您所在的门店进行备案，备案后可开展线上问诊服务。</text>
+
+					<view class="form-row arrow" @tap="goMerchantSearch">
+						<text class="form-label required">门店</text>
+						<view class="form-input-row">
+							<text class="form-value" :class="{ ph: !selectedMerchant.name }">{{selectedMerchant.name || '请选择门店'}}</text>
+							<text class="arrow-icon">›</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="section-card" v-if="selectedMerchant.name">
+					<view class="filing-preview">
+						<image class="preview-avatar" :src="selectedMerchant.avatar || '/static/images/default-avatar.png'" mode="aspectFill"></image>
+						<view class="preview-info">
+							<text class="preview-name">{{selectedMerchant.name}}</text>
+							<view class="preview-star" v-if="selectedMerchant.starLevel">
+								<text class="star" v-for="s in selectedMerchant.starLevel" :key="s">★</text>
+							</view>
+						</view>
+					</view>
+				</view>
+
+				<view class="section-card">
+					<view class="form-tip">
+						<text class="iconfont icon-ic_tips"></text>
+						<text class="tip-text">备案信息提交后需等待平台审核，审核通过后即可在该门店执业。</text>
+					</view>
+				</view>
 			</view>
 		</scroll-view>
 
 		<!-- 底部按钮 -->
+	<view class="bottom-btn-wrap" v-if="activeTab === 1 && auditStatus === 1 && selectedMerchant.name">
+		<view class="bottom-btn" :class="{ disabled: filingSubmitting }" @tap="submitFiling">
+			{{ filingSubmitting ? '提交中...' : '提交备案' }}
+		</view>
+	</view>
 	<view class="bottom-btn-wrap" v-if="activeTab === 0">
 		<view class="bottom-btn" :class="{ disabled: submitting || !!uploadingField }" @tap="submitForm">
 			{{ submitting ? '提交中...' : '提交认证' }}
@@ -289,7 +343,7 @@
 </template>
 
 <script>
-import { getDoctorInfo, uploadQualification } from '@/api/doctor';
+import { getDoctorInfo, uploadQualification, getCareerList, getTitleList, getMerchantSearchList } from '@/api/doctor';
 import { uploadDoctorImage } from '@/utils/doctorRequest';
 import { normalizeDoctorInfo } from '@/utils/siteLogo';
 
@@ -325,9 +379,13 @@ export default {
 				signatureImageUrl: '',
 				type: 1
 			},
-			professionOptions: ['执业医师', '助理医师'],
-			titleOptions: ['医士', '医学生', '金牌专家'],
-			departmentOptions: ['内科', '外科', '儿科', '妇科', '皮肤科', '眼科', '耳鼻喉科', '口腔科', '精神科', '中医科', '全科']
+		careerOptions: [],
+		titleOptions: [],
+		hospitalSearchResults: [],
+		departmentSearchResults: [],
+		selectedMerchant: { id: 0, name: '', avatar: '', starLevel: 0 },
+		filingInfo: { mchId: 0, merchantName: '', merchantAvatar: '' },
+		filingSubmitting: false
 		};
 	},
 	computed: {
@@ -340,15 +398,24 @@ export default {
 			this.activeTab = Number(options.tab);
 		}
 		this.loadDoctorInfo();
+		this.loadCareerOptions();
+		this.loadTitleOptions();
+	},
+	onUnload() {
+		uni.$off('hospital-selected');
+		uni.$off('department-selected');
+		uni.$off('merchant-selected');
 	},
 	methods: {
-		$back() { uni.navigateBack(); },
-
 		loadDoctorInfo() {
 			getDoctorInfo().then(res => {
 				const d = normalizeDoctorInfo(res.data || {});
-				this.auditStatus = d.auditStatus || 0;
-				// 回填表单（优先已保存值）
+			this.auditStatus = d.auditStatus || 0;
+			this.filingInfo.mchId = d.mchId || 0;
+			if (d.mchId) {
+				this.recordStatus = '已备案';
+			}
+			// 回填表单（优先已保存值）
 				const fields = [
 					'picture', 'name', 'hospitalName', 'hospitalCareer', 'hospitalTitle',
 					'hospitalSub', 'selfInfo', 'hospitalDomain', 'idcardNum',
@@ -397,20 +464,82 @@ export default {
 			});
 		},
 
+		loadCareerOptions() {
+			getCareerList().then(res => {
+				this.careerOptions = (res.data || []).filter(item => item.status === 1);
+			}).catch(() => {});
+		},
+
+		loadTitleOptions() {
+			getTitleList().then(res => {
+				this.titleOptions = (res.data || []).filter(item => item.status === 1);
+			}).catch(() => {});
+		},
+
 		pickField(field) {
-			const maps = {
-				hospitalCareer: this.professionOptions,
-				hospitalTitle: this.titleOptions,
-				hospitalSub: this.departmentOptions
-			};
-			if (maps[field]) {
+			if (field === 'hospitalCareer') {
+				const names = this.careerOptions.map(o => o.name);
+				if (!names.length) return uni.showToast({ title: '职业列表加载中，请稍候', icon: 'none' });
 				uni.showActionSheet({
-					itemList: maps[field],
-					success: (res) => {
-						this.form[field] = maps[field][res.tapIndex];
-					}
+					itemList: names,
+					success: (res) => { this.form.hospitalCareer = names[res.tapIndex]; }
+				});
+			} else if (field === 'hospitalTitle') {
+				const names = this.titleOptions.map(o => o.name);
+				if (!names.length) return uni.showToast({ title: '职称列表加载中，请稍候', icon: 'none' });
+				uni.showActionSheet({
+					itemList: names,
+					success: (res) => { this.form.hospitalTitle = names[res.tapIndex]; }
 				});
 			}
+		},
+
+		goHospitalSearch() {
+			uni.$on('hospital-selected', (data) => {
+				this.form.hospitalName = data.name || '';
+				this.form.hospitalLevel = data.level || '';
+				uni.$off('hospital-selected');
+			});
+			uni.navigateTo({ url: '/pages/auth/hospital-search' });
+		},
+
+		goDepartmentSearch() {
+			uni.$on('department-selected', (data) => {
+				this.form.hospitalSub = data.name || '';
+				uni.$off('department-selected');
+			});
+			uni.navigateTo({ url: '/pages/auth/department-search' });
+		},
+
+		goMerchantSearch() {
+			uni.$on('merchant-selected', (data) => {
+				this.selectedMerchant = {
+					id: data.id || 0,
+					name: data.name || '',
+					avatar: data.avatar || '',
+					starLevel: data.starLevel || 0
+				};
+				uni.$off('merchant-selected');
+			});
+			uni.navigateTo({ url: '/pages/auth/merchant-search' });
+		},
+
+		submitFiling() {
+			if (!this.selectedMerchant.id) {
+				return uni.showToast({ title: '请选择门店', icon: 'none' });
+			}
+			this.filingSubmitting = true;
+			uni.showLoading({ title: '提交中...' });
+			// TODO: 替换为实际的备案提交接口
+			setTimeout(() => {
+				uni.hideLoading();
+				this.filingSubmitting = false;
+				this.filingInfo.mchId = this.selectedMerchant.id;
+				this.filingInfo.merchantName = this.selectedMerchant.name;
+				this.filingInfo.merchantAvatar = this.selectedMerchant.avatar;
+				this.recordStatus = '已备案';
+				uni.showToast({ title: '备案提交成功，等待审核', icon: 'none' });
+			}, 600);
 		},
 
 		submitForm() {
@@ -449,36 +578,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$primary: #56C2B8;
+$primary: $theme-color;
 $required: #E93323;
 
 .qual-page {
 	min-height: 100vh;
 	background: #F5F6FA;
 	padding-bottom: 160rpx;
-}
-
-.nav-bar {
-	display: flex;
-	align-items: center;
-	padding: 88rpx 30rpx 20rpx;
-	background: #fff;
-	position: relative;
-
-	.back-btn {
-		padding: 10rpx 20rpx 10rpx 0;
-		font-size: 36rpx;
-		color: #333;
-	}
-
-	.nav-title {
-		position: absolute;
-		left: 50%;
-		transform: translateX(-50%);
-		font-size: 32rpx;
-		font-weight: 600;
-		color: #111;
-	}
 }
 
 .tabs {
@@ -992,7 +1098,90 @@ $required: #E93323;
 	margin-top: 10rpx;
 }
 
-// 备案认证占位
+// 备案认证
+.filed-merchant {
+	display: flex;
+	align-items: center;
+	padding: 20rpx 0;
+}
+
+.filed-avatar {
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 12rpx;
+	margin-right: 20rpx;
+	flex-shrink: 0;
+	background: #eee;
+}
+
+.filed-info {
+	flex: 1;
+}
+
+.filed-name {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 500;
+	color: #333;
+}
+
+.filed-status {
+	display: inline-flex;
+	align-items: center;
+	font-size: 22rpx;
+	color: $primary;
+	background: rgba(86, 194, 184, 0.08);
+	padding: 4rpx 16rpx;
+	border-radius: 20rpx;
+	margin-top: 10rpx;
+}
+
+.filed-dot {
+	width: 10rpx;
+	height: 10rpx;
+	border-radius: 50%;
+	background: $primary;
+	margin-right: 8rpx;
+}
+
+.section-hint {
+	display: block;
+	font-size: 22rpx;
+	color: #999;
+	margin-top: -12rpx;
+	margin-bottom: 20rpx;
+}
+
+.filing-preview {
+	display: flex;
+	align-items: center;
+	padding: 16rpx 0;
+}
+
+.preview-avatar {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 10rpx;
+	margin-right: 20rpx;
+	background: #eee;
+}
+
+.preview-info {
+	flex: 1;
+}
+
+.preview-name {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 500;
+	color: #333;
+}
+
+.preview-star {
+	margin-top: 8rpx;
+	.star { font-size: 22rpx; color: #FAAD14; }
+}
+
 .empty-record {
 	display: flex;
 	flex-direction: column;

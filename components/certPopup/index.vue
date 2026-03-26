@@ -33,7 +33,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$primary: #56C2B8;
+$primary: $theme-color;
 
 .cert-mask {
 	position: fixed;
